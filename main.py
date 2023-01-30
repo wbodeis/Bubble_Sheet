@@ -21,6 +21,14 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 edged = cv2.Canny(blurred, 75, 200)
 
+""" Added to see the color """
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('images/test_02.png')
+imgplot = plt.imshow(img)
+plt.show()
+
+
 # find contours in the edge map, then initialize
 # the contour that corresponds to the document
 cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
