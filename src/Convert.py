@@ -20,7 +20,7 @@ class Convert():
     def _convert_pdf(self):
 
         image = convert_from_path('PDFs/' + self.pdf_names[0],
-                                   poppler_path = 'poppler-23.01.0//Library//bin',
+                                   poppler_path = 'poppler//Library//bin',
                                    dpi = 700, 
                                    first_page = 1, 
                                    last_page = 1)
