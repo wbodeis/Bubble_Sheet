@@ -1,5 +1,5 @@
 .venv
-results/
-images/
+results/*
+images/*
 poppler/
-pdf/
+pdf/*
