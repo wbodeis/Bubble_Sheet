@@ -10,12 +10,20 @@ class Convert():
 
         # Initializing functions.
         self._get_pdf_names()
+        self._check_directories()
 
     def _get_pdf_names(self):
         try:
             self.pdf_names = (os.listdir('pdf/'))
         except:
             raise ImportError('No PDF files were found.')
+    
+    def _check_directories(self):
+        if not os.path.exists(self.image_directory):
+            os.makedirs(self.image_directory)
+        
+        if not os.path.exists(self.PDF_directory):
+            os.makedirs(self.PDF_directory)
 
     def _convert_pdf(self):
 
