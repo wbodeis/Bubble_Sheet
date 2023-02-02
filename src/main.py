@@ -27,5 +27,3 @@ class OMR_Scantron():
         
         if not os.path.exists(self.PDF_directory):
             os.makedirs(self.PDF_directory)
-
-_check_directories()
