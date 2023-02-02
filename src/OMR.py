@@ -19,7 +19,6 @@ cv2.imwrite('res.png',img)
 
 
 
-
 # img = cv2.imread('images/B_Orig.png')
 img = cv2.imread('images/Ex.jpg')
 lower_bound = (0,0,0)
