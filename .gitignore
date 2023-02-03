@@ -1,1 +1,5 @@
 .venv
+images/
+input/
+results/
+testing/
