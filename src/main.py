@@ -23,7 +23,9 @@ class OMR_Scantron():
             del self
             raise FileNotFoundError('No PDF files were found.')
         
+        self._convert_pdf_to_png()
         self._process_images()
+        print(self._scanned_values[0])
         
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self):
@@ -34,7 +36,7 @@ class OMR_Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_pdf_names(self):
-        self._pdf_names = [i for i in os.listdir(self._PDF_directory[0]) if i.endswith('.pdf')]
+        self._pdf_names = [i for i in os.listdir(self._PDF_directory) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_png(self):
@@ -56,11 +58,11 @@ class OMR_Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _process_images(self):
-        #for i in range(len(self._pdf_names)):
-        #    img = cv2.imread('images/' + i + '.png')
-            img = cv2.imread('images/Score.png')
-            h, w = img.shape[:2]
-            points = []
+        for i in range(len(self._pdf_names)):
+            img = cv2.imread('images/' + str(i) + '.png')
+            # img = cv2.imread('images/Score.jpeg')
+            # h, w = img.shape[:2]
+            marks = []
             # trim 15 from bottom and 5 from right to remove partial answer and extraneous red
             # img = img[0:h-15, 0:w-5]
 
@@ -86,14 +88,12 @@ class OMR_Scantron():
                 cy = int(M["m01"] / M["m00"])
                 cv2.circle(result, (cx, cy), 20, (0, 255, 0), -1)
                 pt = (cx,cy)
-                points.append(pt)
-            self._scanned_values[0] = tuple(points)
+                marks.append(pt)
+            self._scanned_values[0] = tuple(marks)
             
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     try:
         con = OMR_Scantron()
-        con._scanned_values[0]
-        print('here')
     except Exception as ex:
         print(ex)
