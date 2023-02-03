@@ -36,7 +36,7 @@ img = cv2.imread('images/Score.jpeg')
 h, w = img.shape[:2]
 
 # trim 15 from bottom and 5 from right to remove partial answer and extraneous red
-img = img[0:h-15, 0:w-5]
+# img = img[0:h-15, 0:w-5]
 
 # threshold on white color
 lower=(225,225,225)
