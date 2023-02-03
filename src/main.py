@@ -13,6 +13,7 @@ class OMR_Scantron():
         self._image_directory: str = 'images/'
         self._results_directory: str = 'results/'
         self._pdf_names: list[str]
+        self._scanned_values: dict = {}
 
         # Initializing functions.
         self._check_directories()
@@ -33,7 +34,7 @@ class OMR_Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_pdf_names(self):
-        self._pdf_names = [f for f in os.listdir(self._PDF_directory[0]) if f.endswith('.pdf')]
+        self._pdf_names = [i for i in os.listdir(self._PDF_directory[0]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_png(self):
@@ -49,15 +50,17 @@ class OMR_Scantron():
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_all_points(self):
+    def _get_all_circles(self):
+        # TODO Do this for the completely fileld out form?
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _process_images(self):
-        for i in range(len(self._pdf_names)):
-            img = cv2.imread('images/' + i + '.png')
+        #for i in range(len(self._pdf_names)):
+        #    img = cv2.imread('images/' + i + '.png')
+            img = cv2.imread('images/Score.png')
             h, w = img.shape[:2]
-
+            points = []
             # trim 15 from bottom and 5 from right to remove partial answer and extraneous red
             # img = img[0:h-15, 0:w-5]
 
@@ -77,22 +80,20 @@ class OMR_Scantron():
             result = img.copy() 
             contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             contours = contours[0] if len(contours) == 2 else contours[1]
-            print("count:", len(contours))
-            print('')
-            i = 1
-            for cntr in contours:
-                M = cv2.moments(cntr)
+            for contour in contours:
+                M = cv2.moments(contour)
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
                 cv2.circle(result, (cx, cy), 20, (0, 255, 0), -1)
                 pt = (cx,cy)
-                print("circle #:",i, "center:",pt)
-                i = i + 1
-
-
+                points.append(pt)
+            self._scanned_values[0] = tuple(points)
+            
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     try:
         con = OMR_Scantron()
+        con._scanned_values[0]
+        print('here')
     except Exception as ex:
         print(ex)
