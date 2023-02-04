@@ -32,11 +32,7 @@ import cv2
 import numpy as np
 
 # read image
-img = cv2.imread('images/Score.jpeg')
-h, w = img.shape[:2]
-
-# trim 15 from bottom and 5 from right to remove partial answer and extraneous red
-# img = img[0:h-15, 0:w-5]
+img = cv2.imread('images/3.jpeg')
 
 # threshold on white color
 lower=(225,225,225)
@@ -44,10 +40,18 @@ upper=(255,255,255)
 thresh = cv2.inRange(img, lower, upper)
 thresh = 255 - thresh
 
+# plt.imshow(thresh, cmap='gray')
+# plt.show()
+
+# kernel = np.ones((5,5),np.uint8)
+# img = cv2.erode(img, kernel, iterations = 1)
+# plt.imshow(img)
+# plt.show()
+
 # apply morphology close
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (30,30))
 morph = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7,7))
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))
 morph = cv2.morphologyEx(morph, cv2.MORPH_CLOSE, kernel)
 
 # get contours
@@ -57,15 +61,24 @@ contours = contours[0] if len(contours) == 2 else contours[1]
 print("count:", len(contours))
 print('')
 i = 1
+# marks = []
 for cntr in contours:
     M = cv2.moments(cntr)
     cx = int(M["m10"] / M["m00"])
     cy = int(M["m01"] / M["m00"])
-    cv2.circle(result, (cx, cy), 20, (0, 255, 0), -1)
+    cv2.circle(result, (cx, cy), 40, (0, 255, 0), -1)
     pt = (cx,cy)
     print("circle #:",i, "center:",pt)
+    # marks.append((cx, cy))
     i = i + 1
-    
+
+# with open('results/marks.txt', 'w') as f:
+#     for mark in marks:
+#         # write each item on a new line
+#         temp = str(mark[0]) + '  ' + str(mark[1])
+#         f.write('%s\n' % temp)
+#     print('Done')
+
 # save results
 cv2.imwrite('results/omr_sheet_thresh2.png',thresh)
 cv2.imwrite('results/omr_sheet_morph2.png',morph)

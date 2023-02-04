@@ -8,7 +8,6 @@ class Convert():
     def __init__(self) -> None:
         self.image_directory: str = 'images/'
         self.PDF_directory: str = 'input/'
-        self.results_directory: str = 'results/'
         self.pdf_names: list[str]
 
         # Initializing functions.
@@ -18,6 +17,8 @@ class Convert():
     def _get_pdf_names(self):
         try:
             self.pdf_names = [f for f in os.listdir(self.PDF_directory) if f.endswith('.pdf')]
+            # total = os.listdir(self.PDF_directory)
+            # for i in range
         except:
             raise ImportError('No PDF files were found.')
     
@@ -29,8 +30,8 @@ class Convert():
                                       dpi = 700,  
                                       last_page = 1,
                                       thread_count = 10)
-            location = self.image_directory + str(i + 1) + '.png'
-            image[0].save(location, 'PNG')
+            location = self.image_directory + str(i + 1) + '.jpeg'
+            image[0].save(location, 'jpeg')
 
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":

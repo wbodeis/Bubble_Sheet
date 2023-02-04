@@ -23,7 +23,7 @@ class OMR_Scantron():
             del self
             raise FileNotFoundError('No PDF files were found.')
         
-        self._convert_pdf_to_png()
+        self._convert_pdf_to_jpeg()
         self._process_images()
         print(self._scanned_values[0])
         
@@ -39,16 +39,16 @@ class OMR_Scantron():
         self._pdf_names = [i for i in os.listdir(self._PDF_directory) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_png(self):
+    def _convert_pdf_to_jpeg(self):
         for i in range(len(self._pdf_names)):
             image = convert_from_path(self._PDF_directory + self._pdf_names[i],
                                       poppler_path = 'poppler/Library/bin',
                                       dpi = 700,  
                                       last_page = 1,
                                       thread_count = 10)
-            location = self._image_directory + str(i) + '.png'
+            location = self._image_directory + str(i) + '.jpeg'
             image[0].save(fp = location,
-                          bitmap_format = 'png')
+                          bitmap_format = 'JPEG')
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -59,12 +59,8 @@ class OMR_Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def _process_images(self):
         for i in range(len(self._pdf_names)):
-            img = cv2.imread('images/' + str(i) + '.png')
-            # img = cv2.imread('images/Score.jpeg')
-            # h, w = img.shape[:2]
             marks = []
-            # trim 15 from bottom and 5 from right to remove partial answer and extraneous red
-            # img = img[0:h-15, 0:w-5]
+            img = cv2.imread('images/' + str(i) + '.jpeg')
 
             # threshold on white color
             lower=(225,225,225)
@@ -73,9 +69,9 @@ class OMR_Scantron():
             thresh = 255 - thresh
 
             # apply morphology close
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (30,30))
             morph = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7,7))
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10,10))
             morph = cv2.morphologyEx(morph, cv2.MORPH_CLOSE, kernel)
 
             # get contours
