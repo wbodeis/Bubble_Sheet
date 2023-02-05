@@ -32,7 +32,7 @@ import cv2
 import numpy as np
 
 # read image
-img = cv2.imread('images/3.jpeg')
+img = cv2.imread('images/5.jpeg')
 
 # threshold on white color
 lower=(225,225,225)
@@ -80,9 +80,9 @@ for cntr in contours:
 #     print('Done')
 
 # save results
-cv2.imwrite('results/omr_sheet_thresh2.png',thresh)
-cv2.imwrite('results/omr_sheet_morph2.png',morph)
-cv2.imwrite('results/omr_sheet_result2.png',result)
+cv2.imwrite('results/Thresh.png',thresh)
+cv2.imwrite('results/Morph.png',morph)
+cv2.imwrite('results/Result.png',result)
 
 # show results
 # cv2.imshow("thresh", thresh)
