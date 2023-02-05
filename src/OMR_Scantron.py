@@ -1,133 +1,104 @@
-# import the necessary packages
-from imutils.perspective import four_point_transform
-from imutils import contours
-import numpy as np
-import argparse
-import imutils
-import cv2
+#======================================================================================================================+
+# FIle:  Bubble_Sheet/src/main.py
+# Project: OMR Scanrtron for FRC Team 5712
+# Author:  William Bodeis <wdbodeis@gmail.com>
+#-----------------------------------------------------------------------------------------------------------------------
 
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required=True,
-	help="path to the input image")
-args = vars(ap.parse_args())
-# define the answer key which maps the question number
-# to the correct answer
-ANSWER_KEY = {0: 1, 1: 4, 2: 0, 3: 3, 4: 1}
+import os, cv2, numpy as np
+from pdf2image import convert_from_path
 
-# load the image, convert it to grayscale, blur it
-# slightly, then find edges
-image = cv2.imread(args["image"])
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(blurred, 75, 200)
+class OMR_Scantron():
+    def __init__(self) -> None:
+        self._PDF_directory: str = 'input/'
+        self._image_directory: str = 'images/'
+        self._results_directory: str = 'results/'
+        self._pdf_names: list[str]
+        self._scanned_values: dict = {}
 
-""" Added to see the color """
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-img = mpimg.imread('images/test_02.png')
-imgplot = plt.imshow(img)
-plt.show()
+        # Initializing functions.
+        self._check_directories()
+        self._get_pdf_names()
+
+        if self._pdf_names == None:
+            del self
+            raise FileNotFoundError('No PDF files were found.')
+        
+        self._convert_pdf_to_jpeg()
+        self._process_images()
+
+        print(self._scanned_values)
+        
+#-----------------------------------------------------------------------------------------------------------------------
+    def _check_directories(self):
+        directories = [self._PDF_directory,
+                       self._image_directory, 
+                       self._results_directory]
+        for directory in directories:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _get_pdf_names(self):
+        self._pdf_names = [i for i in os.listdir(self._PDF_directory) if i.endswith('.pdf')]
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _convert_pdf_to_jpeg(self):
+        for i in range(len(self._pdf_names)):
+            image = convert_from_path(self._PDF_directory + self._pdf_names[i],
+                                      poppler_path = 'poppler/Library/bin',
+                                      dpi = 700,  
+                                      last_page = 1,
+                                      thread_count = 10)
+            location = self._image_directory + str(i) + '.jpeg'
+            image[0].save(fp = location,
+                          bitmap_format = 'JPEG')
 
 
-# find contours in the edge map, then initialize
-# the contour that corresponds to the document
-cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
-	cv2.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
-docCnt = None
-# ensure that at least one contour was found
-if len(cnts) > 0:
-    # sort the contours according to their size in
-    # descending order
-    cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    # loop over the sorted contours
-    for c in cnts:
-        # approximate the contour
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-        # if our approximated contour has four points,
-        # then we can assume we have found the paper
-        if len(approx) == 4:
-            docCnt = approx
-            break
+#-----------------------------------------------------------------------------------------------------------------------
+    def _get_averages(self):
+        # TODO Do this for the completely fileld out forms
+        # Also try and figure out the RMS for all of them
+        pass
 
-# apply a four point perspective transform to both the
-# original image and grayscale image to obtain a top-down
-# birds eye view of the paper
-paper = four_point_transform(image, docCnt.reshape(4, 2))
-warped = four_point_transform(gray, docCnt.reshape(4, 2))
+#-----------------------------------------------------------------------------------------------------------------------
+    def _process_images(self):
+        for i in range(len(self._pdf_names)):
+            marks = []
+            img = cv2.imread('images/' + str(i) + '.jpeg')
 
-# apply Otsu's thresholding method to binarize the warped
-# piece of paper
-thresh = cv2.threshold(warped, 0, 255,
-    cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+            # threshold on white color
+            lower=(225,225,225)
+            upper=(255,255,255)
+            thresh = cv2.inRange(img, lower, upper)
+            thresh = 255 - thresh
 
-# find contours in the thresholded image, then initialize
-# the list of contours that correspond to questions
-cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-    cv2.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
-questionCnts = []
-# loop over the contours
-for c in cnts:
-    # compute the bounding box of the contour, then use the
-    # bounding box to derive the aspect ratio
-    (x, y, w, h) = cv2.boundingRect(c)
-    ar = w / float(h)
-    # in order to label the contour as a question, region
-    # should be sufficiently wide, sufficiently tall, and
-    # have an aspect ratio approximately equal to 1
-    if w >= 20 and h >= 20 and ar >= 0.9 and ar <= 1.1:
-        questionCnts.append(c)
+            # Apply erosion
+            kernel = np.ones((5,5),np.uint8)
+            img = cv2.erode(img, kernel, iterations = 1)
 
-# sort the question contours top-to-bottom, then initialize
-# the total number of correct answers
-questionCnts = contours.sort_contours(questionCnts,
-    method="top-to-bottom")[0]
-correct = 0
-# each question has 5 possible answers, to loop over the
-# question in batches of 5
-for (q, i) in enumerate(np.arange(0, len(questionCnts), 5)):
-    # sort the contours for the current question from
-    # left to right, then initialize the index of the
-    # bubbled answer
-    cnts = contours.sort_contours(questionCnts[i:i + 5])[0]
-    bubbled = None
+            # Apply morphology open
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (30,30))
+            morph = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+            # Apply morphology close
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10,10))
+            morph = cv2.morphologyEx(morph, cv2.MORPH_CLOSE, kernel)
 
-    # loop over the sorted contours
-    for (j, c) in enumerate(cnts):
-        # construct a mask that reveals only the current
-        # "bubble" for the question
-        mask = np.zeros(thresh.shape, dtype="uint8")
-        cv2.drawContours(mask, [c], -1, 255, -1)
-        # apply the mask to the thresholded image, then
-	    # count the number of non-zero pixels in the
-        # bubble area
-        mask = cv2.bitwise_and(thresh, thresh, mask=mask)
-        total = cv2.countNonZero(mask)
-        # if the current total has a larger number of total
-        # non-zero pixels, then we are examining the currently
-        # bubbled-in answer
-        if bubbled is None or total > bubbled[0]:
-            bubbled = (total, j)
-
-# initialize the contour color and the index of the
-# *correct* answer
-color = (0, 0, 255)
-k = ANSWER_KEY[q]
-# check to see if the bubbled answer is correct
-if k == bubbled[1]:
-    color = (0, 255, 0)
-    correct += 1
-	# draw the outline of the correct answer on the test
-    cv2.drawContours(paper, [cnts[k]], -1, color, 3)
-
-# grab the test taker
-score = (correct / 5.0) * 100
-print("[INFO] score: {:.2f}%".format(score))
-cv2.putText(paper, "{:.2f}%".format(score), (10, 30),
-	cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-cv2.imshow("Original", image)
-cv2.imshow("Exam", paper)
-cv2.waitKey(0)
+            # get contours
+            # result = img.copy() 
+            contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            contours = contours[0] if len(contours) == 2 else contours[1]
+            for contour in contours:
+                M = cv2.moments(contour)
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+                # cv2.circle(result, (cx, cy), 30, (0, 255, 0), -1)
+                pt = (cx,cy)
+                marks.append(pt)
+            self._scanned_values[i] = tuple(marks)
+            
+#-----------------------------------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    try:
+        con = OMR_Scantron()
+    except Exception as ex:
+        print(ex)
