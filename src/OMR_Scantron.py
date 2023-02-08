@@ -66,32 +66,54 @@ class OMR_Scantron():
             marks = []
             img = cv2.imread('images/' + str(i) + '.jpeg')
 
-            # threshold on white color
-            lower=(225,225,225)
-            upper=(255,255,255)
-            thresh = cv2.inRange(img, lower, upper)
-            thresh = 255 - thresh
+            # Threshold for blue.
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            lower_range = np.array([110,50,50])
+            upper_range = np.array([130,255,255])
 
-            # Apply erosion
-            kernel = np.ones((5,5),np.uint8)
-            img = cv2.erode(img, kernel, iterations = 1)
+            # Threshold for green.
+            # lower_range = np.array([36, 25, 25])
+            # upper_range = np.array([70, 255,255])
 
-            # Apply morphology open
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (30,30))
-            morph = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-            # Apply morphology close
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10,10))
-            morph = cv2.morphologyEx(morph, cv2.MORPH_CLOSE, kernel)
+            # TODO Get the correct HSV color for the red
+            # Threshold for red.
+            # lower = np.array([155,25,0])
+            # upper = np.array([179,255,255])
 
-            # get contours
-            # result = img.copy() 
-            contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            thresh = cv2.inRange(src = hsv,
+                                 lowerBound = lower_range, 
+                                 upperbBound = upper_range)
+
+            # Apply erosion.
+            kernel = np.ones(shape = (5,5),
+                             dtype = np.uint8)
+            erode = cv2.erode(src = thresh,
+                              kernel = kernel,
+                              iterations = 1)
+
+            # Apply morphology open.
+            kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
+                                               ksize = (30,30))
+            first_morph = cv2.morphologyEx(src = erode, 
+                                           kernel = kernel, 
+                                           op = cv2.MORPH_OPEN)
+
+            # Apply morphology close.
+            kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
+                                               ksize = (10,10))
+            second_morph = cv2.morphologyEx(src = first_morph,
+                                            kernel = kernel, 
+                                            op = cv2.MORPH_CLOSE)
+
+            # Get contours
+            contours = cv2.findContours(image = second_morph,
+                                        mode = cv2.RETR_EXTERNAL,
+                                        method= cv2.CHAIN_APPROX_NONE)
             contours = contours[0] if len(contours) == 2 else contours[1]
             for contour in contours:
                 M = cv2.moments(contour)
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
-                # cv2.circle(result, (cx, cy), 30, (0, 255, 0), -1)
                 pt = (cx,cy)
                 marks.append(pt)
             self._scanned_values[i] = tuple(marks)
