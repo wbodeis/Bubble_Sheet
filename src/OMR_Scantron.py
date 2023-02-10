@@ -4,19 +4,20 @@
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
 
-import os, cv2, numpy as np
+import os, cv2, numpy as np, pandas as pd
 from pdf2image import convert_from_path
 
 class OMR_Scantron():
     def __init__(self) -> None:
-        self._PDF_directory: str = 'input/'
-        self._image_directory: str = 'images/'
-        self._results_directory: str = 'results/'
+        self._directories: list[str] = []
         self._pdf_names: list[str]
         self._image_names: list[str]
-        self._scanned_values: dict = {}
+        self._scanned_values: list = []
+
+        pd.DataFrame
 
         # Initializing functions.
+        self._create_directories()
         self._check_directories()
 
         self._get_pdf_names()
@@ -32,34 +33,38 @@ class OMR_Scantron():
 
         self._process_images()
         self.print_scanned_values()
+        # self.write_to_file()
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _create_directories(self):
+        self._directories.append('input/')
+        self._directories.append('images/')
+        self._directories.append('results/')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self):
-        directories = [self._PDF_directory,
-                       self._image_directory, 
-                       self._results_directory]
-        for directory in directories:
+        for directory in self._directories:
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_pdf_names(self):
-        self._pdf_names = [i for i in os.listdir(self._PDF_directory) if i.endswith('.pdf')]
+        self._pdf_names = [i for i in os.listdir(self._directories[0]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_image_names(self):
-        self._image_names = [i for i in os.listdir(self._image_directory) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+        self._image_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_jpeg(self):
         for i in range(len(self._pdf_names)):
-            images = convert_from_path(self._PDF_directory + self._pdf_names[i],
+            images = convert_from_path(self._directories[0] + self._pdf_names[i],
                                        poppler_path = 'poppler/Library/bin',
                                        dpi = 700,
                                        thread_count = 12)
             for j in range(len(images)):
                 # TODO get to work with PNG as well.
-                location = self._image_directory + str(i+1) + '-' + str(j+1) + '.jpeg'
+                location = self._directories[1] + str(i+1) + '-' + str(j+1) + '.jpeg'
                 images[j].save(fp = location,
                                bitmap_format = 'JPEG')
 
@@ -134,12 +139,20 @@ class OMR_Scantron():
                 cy = int(M["m01"] / M["m00"])
                 pt = (cx,cy)
                 marks.append(pt)
-            self._scanned_values[i] = tuple(marks)
+            self._scanned_values.append(tuple(marks))
             
 #-----------------------------------------------------------------------------------------------------------------------
     def print_scanned_values(self):
+        print(type(self._scanned_values))
+        print(len(self._scanned_values))
         for i in range(len(self._scanned_values)):
-            print(len(self._scanned_values[i]))
+            print(self._scanned_values[i])
+            print(sorted(self._scanned_values[i]))
+#-----------------------------------------------------------------------------------------------------------------------
+    def write_to_file(self):
+        with open("testing/output.txt", "w") as f:
+            for item in self._scanned_values[0]:
+                f.write("%s %s \n" % (item[0], item[1]))
 
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
