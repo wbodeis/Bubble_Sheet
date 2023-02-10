@@ -2,9 +2,9 @@
 
 ## Folders
 You need the three following folders:
-input/
-images/
-results/
+- input/
+- images/
+- results/
 
 The most important being **input** because it is needed to begin processing the data, while the other two will be created if they don't already exist. 
 
