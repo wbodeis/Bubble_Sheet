@@ -13,21 +13,26 @@ class OMR_Scantron():
         self._image_directory: str = 'images/'
         self._results_directory: str = 'results/'
         self._pdf_names: list[str]
+        self._image_names: list[str]
         self._scanned_values: dict = {}
 
         # Initializing functions.
         self._check_directories()
+
         self._get_pdf_names()
+        if not self._pdf_names:
+            print('No PDF files were found to convert.')
+        else:
+            self._convert_pdf_to_jpeg()
 
-        if self._pdf_names == None:
+        self._get_image_names()
+        if not self._image_names:
             del self
-            raise FileNotFoundError('No PDF files were found.')
-        
-        self._convert_pdf_to_jpeg()
-        self._process_images()
+            raise FileExistsError('No image files to process were found.')
 
-        print(self._scanned_values)
-        
+        self._process_images()
+        self.print_scanned_values()
+
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self):
         directories = [self._PDF_directory,
@@ -42,32 +47,38 @@ class OMR_Scantron():
         self._pdf_names = [i for i in os.listdir(self._PDF_directory) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
+    def _get_image_names(self):
+        self._image_names = [i for i in os.listdir(self._image_directory) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+
+#-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_jpeg(self):
         for i in range(len(self._pdf_names)):
-            image = convert_from_path(self._PDF_directory + self._pdf_names[i],
-                                      poppler_path = 'poppler/Library/bin',
-                                      dpi = 700,  
-                                      last_page = 1,
-                                      thread_count = 10)
-            location = self._image_directory + str(i) + '.jpeg'
-            image[0].save(fp = location,
-                          bitmap_format = 'JPEG')
+            images = convert_from_path(self._PDF_directory + self._pdf_names[i],
+                                       poppler_path = 'poppler/Library/bin',
+                                       dpi = 700,
+                                       thread_count = 12)
+            for j in range(len(images)):
+                # TODO get to work with PNG as well.
+                location = self._image_directory + str(i+1) + '-' + str(j+1) + '.jpeg'
+                images[j].save(fp = location,
+                               bitmap_format = 'JPEG')
 
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_averages(self):
-        # TODO Do this for the completely fileld out forms
+        # TODO Do this for the completely filled out forms
         # Also try and figure out the RMS for all of them
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _process_images(self):
-        for i in range(len(self._pdf_names)):
+        for i in range(len(self._image_names)):
             marks = []
-            img = cv2.imread('images/' + str(i) + '.jpeg')
+            img = cv2.imread('images/' + self._image_names[i])
+
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
             # Threshold for blue.
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             lower_range = np.array([110,50,50])
             upper_range = np.array([130,255,255])
 
@@ -75,14 +86,21 @@ class OMR_Scantron():
             # lower_range = np.array([36, 25, 25])
             # upper_range = np.array([70, 255,255])
 
-            # TODO Get the correct HSV color for the red
+            # TODO Get the correct HSV color for the red and yellow. 
             # Threshold for red.
             # lower = np.array([155,25,0])
             # upper = np.array([179,255,255])
 
-            thresh = cv2.inRange(src = hsv,
-                                 lowerBound = lower_range, 
-                                 upperbBound = upper_range)
+            # Threshold for yellow.
+            # lower = np.array([20,100,100])
+            # upper = np.array([30,255,255])
+
+            # TODO Figure out what values go to which. 
+            # thresh = cv2.inRange(src = hsv,
+            #                      lowerBound = lower_range, 
+            #                      upperbBound = upper_range)
+
+            thresh = cv2.inRange(hsv, lower_range, upper_range)
 
             # Apply erosion.
             kernel = np.ones(shape = (5,5),
@@ -119,8 +137,10 @@ class OMR_Scantron():
             self._scanned_values[i] = tuple(marks)
             
 #-----------------------------------------------------------------------------------------------------------------------
+    def print_scanned_values(self):
+        for i in range(len(self._scanned_values)):
+            print(len(self._scanned_values[i]))
+
+#-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    try:
-        con = OMR_Scantron()
-    except Exception as ex:
-        print(ex)
+    OMR_Scantron()
