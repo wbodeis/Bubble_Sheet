@@ -6,15 +6,23 @@
 
 import os, cv2, numpy as np, pandas as pd
 from pdf2image import convert_from_path
+# from score_sheet import scoring_columns
 
 class OMR_Scantron():
-    def __init__(self) -> None:
+    def __init__(self,
+                 image_type = '.jpeg') -> None:
+        
+        self.image_type: str = image_type
         self._directories: list[str] = []
         self._pdf_names: list[str]
         self._image_names: list[str]
+        self._key_names: list[str]
         self._scanned_values: list = []
+        self._scanned_keys: list = []
+        self._total_values: int = 155
+        # self._
 
-        pd.DataFrame
+        # self._score_sheet = pd.DataFrame(columns = scoring_columns)
 
         # Initializing functions.
         self._create_directories()
@@ -24,14 +32,17 @@ class OMR_Scantron():
         if not self._pdf_names:
             print('No PDF files were found to convert.')
         else:
-            self._convert_pdf_to_jpeg()
+            self._convert_pdf_to_image()
 
         self._get_image_names()
         if not self._image_names:
             del self
             raise FileExistsError('No image files to process were found.')
-
-        self._process_images()
+        self._get_key_names()
+        # TODO Seperate calls for the key(s) and actual data.
+        self._process_images('keys')
+        self._process_images('values')
+        self.print_scanned_keys()
         self.print_scanned_values()
         # self.write_to_file()
 
@@ -40,6 +51,7 @@ class OMR_Scantron():
         self._directories.append('input/')
         self._directories.append('images/')
         self._directories.append('results/')
+        self._directories.append('keys/')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self):
@@ -56,17 +68,26 @@ class OMR_Scantron():
         self._image_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_jpeg(self):
+    def _get_key_names(self):
+        self._key_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _convert_pdf_to_image(self):
         for i in range(len(self._pdf_names)):
-            images = convert_from_path(self._directories[0] + self._pdf_names[i],
+            images = convert_from_path(pdf_path = self._directories[0] + self._pdf_names[i],
                                        poppler_path = 'poppler/Library/bin',
                                        dpi = 700,
                                        thread_count = 12)
+
             for j in range(len(images)):
-                # TODO get to work with PNG as well.
-                location = self._directories[1] + str(i+1) + '-' + str(j+1) + '.jpeg'
-                images[j].save(fp = location,
-                               bitmap_format = 'JPEG')
+                if self.image_type == '.png':
+                    location = self._directories[1] + str(i+1) + '-' + str(j+1) + '.png'
+                    images[j].save(fp = location,
+                                bitmap_format = 'PNG')
+                else:
+                    location = self._directories[1] + str(i+1) + '-' + str(j+1) + '.jpeg'
+                    images[j].save(fp = location,
+                                bitmap_format = 'JPEG')
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -76,10 +97,19 @@ class OMR_Scantron():
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _process_images(self):
-        for i in range(len(self._image_names)):
+    def _process_images(self, data: str):
+        count: int
+        if data == 'keys':
+            count = len(self._key_names)
+        elif data == 'values':
+            count = len(self._image_names)
+
+        for i in range(count):
             marks = []
-            img = cv2.imread('images/' + self._image_names[i])
+            if data == 'keys':
+                img = cv2.imread('keys/' + self._key_names[i])
+            elif data == 'values':
+                img = cv2.imread('images/' + self._image_names[i])
 
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -100,11 +130,6 @@ class OMR_Scantron():
             # lower = np.array([20,100,100])
             # upper = np.array([30,255,255])
 
-            # TODO Figure out what values go to which. 
-            # thresh = cv2.inRange(src = hsv,
-            #                      lowerBound = lower_range, 
-            #                      upperbBound = upper_range)
-
             thresh = cv2.inRange(hsv, lower_range, upper_range)
 
             # Apply erosion.
@@ -116,14 +141,14 @@ class OMR_Scantron():
 
             # Apply morphology open.
             kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                               ksize = (30,30))
+                                               ksize = (25,25))
             first_morph = cv2.morphologyEx(src = erode, 
                                            kernel = kernel, 
                                            op = cv2.MORPH_OPEN)
 
             # Apply morphology close.
             kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                               ksize = (10,10))
+                                               ksize = (7,7))
             second_morph = cv2.morphologyEx(src = first_morph,
                                             kernel = kernel, 
                                             op = cv2.MORPH_CLOSE)
@@ -139,21 +164,35 @@ class OMR_Scantron():
                 cy = int(M["m01"] / M["m00"])
                 pt = (cx,cy)
                 marks.append(pt)
-            self._scanned_values.append(tuple(marks))
+            if data == 'keys':
+                self._scanned_keys.append(tuple(sorted(marks)))
+                cv2.imwrite(str('results/' + self._key_names[i]), second_morph)
+            elif data == 'values':
+                self._scanned_values.append(tuple(sorted(marks)))
+                # cv2.imwrite(str('results/' + self._image_names[i]), second_morph)
             
 #-----------------------------------------------------------------------------------------------------------------------
     def print_scanned_values(self):
         print(type(self._scanned_values))
         print(len(self._scanned_values))
         for i in range(len(self._scanned_values)):
-            print(self._scanned_values[i])
-            print(sorted(self._scanned_values[i]))
+            print(len(self._scanned_values[i]))
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def print_scanned_keys(self):
+        print(type(self._scanned_keys))
+        print(len(self._scanned_keys))
+        for i in range(len(self._scanned_keys)):
+            print(len(self._scanned_keys[i]))
+
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):
-        with open("testing/output.txt", "w") as f:
-            for item in self._scanned_values[0]:
-                f.write("%s %s \n" % (item[0], item[1]))
-
+        try:
+            with open("testing/output.txt", "w") as f:
+                for item in self._scanned_values[0]:
+                    f.write("%s %s \n" % (item[0], item[1]))
+        except Exception as ex:
+            print(ex)
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     OMR_Scantron()
