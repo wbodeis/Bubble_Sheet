@@ -1,5 +1,5 @@
 #======================================================================================================================+
-# FIle:  Bubble_Sheet/src/main.py
+# FIle:  Bubble_Sheet/src/OMR.py
 # Project: OMR Scanrtron for FRC Team 5712
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
@@ -8,50 +8,64 @@ import os, cv2, numpy as np, pandas as pd
 from pdf2image import convert_from_path
 # from score_sheet import scoring_columns
 
-class OMR_Scantron():
+class OMR():
     def __init__(self,
-                 image_type = '.jpeg') -> None:
+                 differential:int = 30,
+                 image_type: str = '.jpeg',
+                 save_image_overlay = False) -> None:
         
+        self.differential:int = differential
         self.image_type: str = image_type
+        self.save_image_overlay = save_image_overlay,
         self._directories: list[str] = []
-        self._pdf_names: list[str]
+        self._pdf_names: list[list[str]] = []
         self._image_names: list[str]
         self._key_names: list[str]
         self._scanned_values: list = []
         self._scanned_keys: list = []
         self._total_values: int = 155
-        # self._
 
         # self._score_sheet = pd.DataFrame(columns = scoring_columns)
 
         # Initializing functions.
-        self._create_directories()
+        self._create_directories_list()
         self._check_directories()
 
-        self._get_pdf_names()
-        if not self._pdf_names:
-            print('No PDF files were found to convert.')
+        # Checking for and converting pdf files if those are used instead of pictures.
+        self._get_keys_pdf_names()
+        self._get_scantron_pdf_names()
+
+        if not self._pdf_names[0]:
+            print('No keys were found to convert from a pdf.')
         else:
-            self._convert_pdf_to_image()
+            self._convert_pdf_to_image('keys')
+        
+        if not self._pdf_names[1]:
+            print('No game sheets were found to convert from a pdf.')
+        else:
+            self._convert_pdf_to_image('scantrons')
 
         self._get_image_names()
-        if not self._image_names:
-            del self
-            raise FileExistsError('No image files to process were found.')
+        # TODO Uncomment once this is finalized. 
+        # if not self._image_names:
+        #     del self
+        #     raise FileExistsError('No image files to process were found.')
         self._get_key_names()
-        # TODO Seperate calls for the key(s) and actual data.
+
+        # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         self._process_images('keys')
-        self._process_images('values')
+        self._process_images('scantron')
+
         self.print_scanned_keys()
-        self.print_scanned_values()
+        # self.print_scanned_values()
         # self.write_to_file()
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _create_directories(self):
-        self._directories.append('input/')
-        self._directories.append('images/')
-        self._directories.append('results/')
-        self._directories.append('keys/')
+    def _create_directories_list(self):
+        self._directories.append('input/')      # 0
+        self._directories.append('images/')     # 1
+        self._directories.append('results/')    # 2
+        self._directories.append('keys/')       # 3
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self):
@@ -60,21 +74,35 @@ class OMR_Scantron():
                 os.makedirs(directory)
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_pdf_names(self):
-        self._pdf_names = [i for i in os.listdir(self._directories[0]) if i.endswith('.pdf')]
+    def _get_keys_pdf_names(self):
+        self._pdf_names.append([i for i in os.listdir(self._directories[3]) if i.endswith('.pdf')])
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _get_scantron_pdf_names(self):
+        self._pdf_names.append([i for i in os.listdir(self._directories[0]) if i.endswith('.pdf')])
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_image_names(self):
-        self._image_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+        self._image_names = [i for i in os.listdir(self._directories[0]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_names(self):
         self._key_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_image(self):
-        for i in range(len(self._pdf_names)):
-            images = convert_from_path(pdf_path = self._directories[0] + self._pdf_names[i],
+    # TODO Fix so that it works with the keys and scantrons.
+    def _convert_pdf_to_image(self,
+                              data: str):
+        count: int
+        path: int
+        if data == 'keys':
+            count = len(self._key_names)
+            path = 3
+        elif data == 'scantron':
+            count = len(self._image_names)
+            path = 1
+        for i in range(count):
+            images = convert_from_path(pdf_path = self._directories[path] + self._scantron_pdf_names[i],
                                        poppler_path = 'poppler/Library/bin',
                                        dpi = 700,
                                        thread_count = 12)
@@ -97,18 +125,19 @@ class OMR_Scantron():
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _process_images(self, data: str):
+    def _process_images(self,
+                        data: str):
         count: int
         if data == 'keys':
             count = len(self._key_names)
-        elif data == 'values':
+        elif data == 'scantron':
             count = len(self._image_names)
 
         for i in range(count):
             marks = []
             if data == 'keys':
                 img = cv2.imread('keys/' + self._key_names[i])
-            elif data == 'values':
+            elif data == 'scantron':
                 img = cv2.imread('images/' + self._image_names[i])
 
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -166,7 +195,7 @@ class OMR_Scantron():
                 marks.append(pt)
             if data == 'keys':
                 self._scanned_keys.append(tuple(sorted(marks)))
-                cv2.imwrite(str('results/' + self._key_names[i]), second_morph)
+                # cv2.imwrite(str('results/' + self._key_names[i]), second_morph)
             elif data == 'values':
                 self._scanned_values.append(tuple(sorted(marks)))
                 # cv2.imwrite(str('results/' + self._image_names[i]), second_morph)
@@ -188,11 +217,12 @@ class OMR_Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):
         try:
-            with open("testing/output.txt", "w") as f:
-                for item in self._scanned_values[0]:
+            print('here')
+            with open("src/output.txt", "w") as f:
+                for item in self._scanned_keys[0]:
                     f.write("%s %s \n" % (item[0], item[1]))
         except Exception as ex:
             print(ex)
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    OMR_Scantron()
+    OMR()
