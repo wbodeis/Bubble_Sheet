@@ -11,7 +11,7 @@ scoring_columns: tuple = (
 'Auton HP MLCube',
 'Auton HP MLCone',
 'Auton HP TR',
-'Auton HP MR'
+'Auton HP MR',
 'Auton HP LRCube',
 'Auton HP LRCone',
 'Auton M TL',
