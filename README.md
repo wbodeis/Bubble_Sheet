@@ -1,14 +1,21 @@
 # Bubble_Sheet
+Project: OMR Scanrtron for FRC Team 5712
+Author: William Bodeis <wdbodeis@gmail.com>
 
 ## Folders
-You need the three following folders:
-- input/
-- images/
+You need the following folders:
+- key/
+- key_images/
+- scantron/
+- scantron_images/
 - results/
 
-The most important being **input** because it is needed to begin processing the data, while the other two will be created if they don't already exist. 
+keys/ and scantron/ are for .pdf files if that was how they were scanned in. The program will convert them to jpeg unless specified to png, which was done mostly as a way to save storage space depending on how many pages were getting converted. 
+**See the note below pertaining to processing the pdf files.** 
 
-### PDF Processing.
+keys_images/ and scantron_images/ are where the jpeg and png files should be saved if those are being used instead of pdfs.
+
+## PDF Processing.
 If your input files are .pdf instead of an image format (.png, .jpg, .jpeg) then you must download the folder at the link below. 
 Download the most current version of poppler and save it to the root folder. 
 https://github.com/oschwartz10612/poppler-windows

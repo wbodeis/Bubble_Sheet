@@ -4,7 +4,7 @@ scoring_columns: tuple = (
 'Alliance',
 'Auton HP TL',
 'Auton HP ML',
-'Auton HP LLCube'
+'Auton HP LLCube',
 'Auton HP LLCone',
 'Auton HP TM',
 'Auton HP MM',

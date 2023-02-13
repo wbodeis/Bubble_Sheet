@@ -1,8 +1,8 @@
 .venv
 poetry.lock
-images/
-input/
+key/
+key_images/
+scantron/
+scantron_images/
 results/
 testing/
-keys/
-old/
