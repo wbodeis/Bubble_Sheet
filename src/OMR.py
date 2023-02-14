@@ -246,7 +246,6 @@ class OMR():
         print(len(self._sorted_keys))
         for i in range(len(self._sorted_keys)):
             print(len(self._sorted_keys[i]))
-        print(self._sorted_keys)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):
