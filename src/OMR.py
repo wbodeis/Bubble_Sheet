@@ -136,11 +136,11 @@ class OMR():
                     try:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_type
                         images[j].save(fp = location,
-                                       bitmap_format = self.image_type.upper())
+                                       bitmap_format = self.image_type)
                     except:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
-                                       bitmap_format = 'JPEG')
+                                       bitmap_format = 'jpeg')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self):
