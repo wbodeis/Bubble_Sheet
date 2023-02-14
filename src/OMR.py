@@ -31,6 +31,7 @@ class OMR():
         self._scanned_keys_average: tuple
         self._key_column_index: tuple(int) = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
         self._total_key_values: int = 155
+        self._cpu_threads: int
 
         # self._score_sheet = pd.DataFrame(columns = scoring_columns)
 
@@ -41,6 +42,7 @@ class OMR():
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
+        self._get_CPU_threads()
 
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf.')
@@ -112,6 +114,15 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
+    def _get_CPU_threads(self):
+        temp_threads = 1
+        try:
+            temp_threads = os.cpu_count()
+        except:
+            self._cpu_threads = temp_threads
+        self._cpu_threads = temp_threads
+
+#-----------------------------------------------------------------------------------------------------------------------
     # TODO Fix so that it works with the keys and scantrons.
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
@@ -119,7 +130,7 @@ class OMR():
                 images = convert_from_path(pdf_path = self._directories[pdf_directory] + pdf_names[i],
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
-                                           thread_count = 12)
+                                           thread_count = self._cpu_threads)
 
                 for j in range(len(images)):
                     if self.image_type == '.png':
