@@ -27,7 +27,7 @@ class OMR():
         self._key_names: list[str]
         self._scanned_values: list = []
         self._scanned_keys: list = []
-        self._sorted_keys: list = []
+        self._sorted_key_values: list = []
         self._scanned_keys_average: tuple
         self._key_column_index: tuple[int] = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
         self._total_key_values: int = 155
@@ -109,7 +109,6 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    # TODO Fix so that it works with the keys and scantrons.
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
         for i in range(len(pdf_names)):
@@ -134,7 +133,7 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self):
-        temp_sorted_key_values = []
+        temp_sorted_key_values: list = []
         for key in self._scanned_keys: # Looping through each key
             temp_key_sorted = []
             for i in range(len(self._key_column_index)): # Sorting out each 'column'
@@ -144,10 +143,11 @@ class OMR():
                     temp_column = key[self._key_column_index[i]: self._key_column_index[i+1]]
                 temp_key_sorted += sorted(temp_column, key = lambda x: x[1]) # Sorting the column. TODO Move the\
             temp_sorted_key_values.append(temp_key_sorted) # Adding the list of each key to the mega list.
-        self._sorted_keys = temp_sorted_key_values
+        self._sorted_key_values = temp_sorted_key_values
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_average(self):
+        temp_sum: int
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -242,10 +242,10 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def print_sorted_keys(self):
-        print(type(self._sorted_keys))
-        print(len(self._sorted_keys))
-        for i in range(len(self._sorted_keys)):
-            print(len(self._sorted_keys[i]))
+        print(type(self._sorted_key_values))
+        print(len(self._sorted_key_values))
+        for i in range(len(self._sorted_key_values)):
+            print(len(self._sorted_key_values[i]))
 
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):
