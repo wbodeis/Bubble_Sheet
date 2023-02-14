@@ -29,7 +29,7 @@ class OMR():
         self._scanned_keys: list = []
         self._sorted_keys: list = []
         self._scanned_keys_average: tuple
-        self._key_column_index: tuple[int] = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
+        self._key_column_index: tuple(int) = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
         self._total_key_values: int = 155
 
         # self._score_sheet = pd.DataFrame(columns = scoring_columns)
@@ -56,9 +56,12 @@ class OMR():
         self._get_key_image_names()
         self._get_scantron_image_names()
         # TODO Uncomment once this is finalized. 
-        # if not self._image_names:
+        # if not self._key_names:
         #     del self
-        #     raise FileExistsError('No image files to process were found.')
+        #     raise FileExistsError('No image for key(s) to process were found.')
+        # if not self._scantron_names:
+        #     del self
+        #     raise FileExistsError('No image for game sheets(s) to process were found.')
 
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         self._process_images(image_directory = 1, 
@@ -179,21 +182,21 @@ class OMR():
 
                     # Apply erosion.
                     kernel = np.ones(shape = (5,5),
-                                    dtype = np.uint8)
+                                     dtype = np.uint8)
                     erode = cv2.erode(src = thresh,
-                                    kernel = kernel,
-                                    iterations = 1)
+                                      kernel = kernel,
+                                      iterations = 1)
 
                     # Apply morphology open.
                     kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                    ksize = (25,25))
+                                                       ksize = (25,25))
                     first_morph = cv2.morphologyEx(src = erode, 
-                                                kernel = kernel, 
-                                                op = cv2.MORPH_OPEN)
+                                                   kernel = kernel, 
+                                                   op = cv2.MORPH_OPEN)
 
                     # Apply morphology close.
                     kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                    ksize = (7,7))
+                                                       ksize = (7,7))
                     second_morph = cv2.morphologyEx(src = first_morph,
                                                     kernel = kernel, 
                                                     op = cv2.MORPH_CLOSE)
@@ -252,9 +255,11 @@ class OMR():
         try:
             count = 0
             with open("src/output.txt", "w") as f:
-                for item in self._scanned_keys[0]:
+                # for item in self._scanned_keys[0]:
+                for item in self._sorted_keys[0]:
                     # f.write("%s %s \n" % (item[0], item[1]))
-                    f.write("%d: ((%s, %s), ), \n" % (count, item[0], item[1]))
+                    # f.write("%d: ((%s, %s), ), \n" % (count, item[0], item[1]))
+                    f.write("%d: (%s, %s)\n" % (count, item[0], item[1]))
                     count += 1
         except Exception as ex:
             print(ex)
