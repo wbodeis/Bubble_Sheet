@@ -11,7 +11,7 @@ from pdf2image import convert_from_path
 class OMR():
     def __init__(self,
                  pixel_differential:int = 30,
-                 image_type: str = '.jpeg',
+                 image_type: str = 'jpeg',
                  save_image_overlay: bool = False) -> None:
 
         # Possible user inputs.
@@ -133,15 +133,11 @@ class OMR():
                                            thread_count = self._cpu_threads)
 
                 for j in range(len(images)):
-                    if self.image_type == '.png':
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.png'
+                    try:
+                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_type
                         images[j].save(fp = location,
-                                       bitmap_format = 'PNG')
-                    elif self.image_type == '.bmp':
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.bmp'
-                        images[j].save(fp = location,
-                                       bitmap_format = 'BMP')
-                    else:
+                                       bitmap_format = self.image_type.upper())
+                    except:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
                                        bitmap_format = 'JPEG')
