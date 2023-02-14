@@ -11,7 +11,7 @@ from pdf2image import convert_from_path
 class OMR():
     def __init__(self,
                  pixel_differential:int = 30,
-                 image_type: str = '.jpeg',
+                 image_type: str = 'jpeg',
                  save_image_overlay: bool = False) -> None:
 
         # Possible user inputs.
@@ -29,8 +29,9 @@ class OMR():
         self._scanned_keys: list = []
         self._sorted_key_values: list = []
         self._scanned_keys_average: tuple
-        self._key_column_index: tuple[int] = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
+        self._key_column_index: tuple(int) = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
         self._total_key_values: int = 155
+        self._cpu_threads: int
 
         # self._score_sheet = pd.DataFrame(columns = scoring_columns)
 
@@ -41,6 +42,7 @@ class OMR():
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
+        self._get_CPU_threads()
 
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf.')
@@ -56,9 +58,12 @@ class OMR():
         self._get_key_image_names()
         self._get_scantron_image_names()
         # TODO Uncomment once this is finalized. 
-        # if not self._image_names:
+        # if not self._key_names:
         #     del self
-        #     raise FileExistsError('No image files to process were found.')
+        #     raise FileExistsError('No image for key(s) to process were found.')
+        # if not self._scantron_names:
+        #     del self
+        #     raise FileExistsError('No image for game sheets(s) to process were found.')
 
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         self._process_images(image_directory = 1, 
@@ -109,27 +114,24 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
+    # TODO Fix so that it works with the keys and scantrons.
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
         for i in range(len(pdf_names)):
                 images = convert_from_path(pdf_path = self._directories[pdf_directory] + pdf_names[i],
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
-                                           thread_count = 12)
+                                           thread_count = self._cpu_threads)
 
                 for j in range(len(images)):
-                    if self.image_type == '.png':
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.png'
+                    try:
+                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_type
                         images[j].save(fp = location,
-                                       bitmap_format = 'PNG')
-                    elif self.image_type == '.bmp':
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.bmp'
-                        images[j].save(fp = location,
-                                       bitmap_format = 'BMP')
-                    else:
+                                       bitmap_format = self.image_type)
+                    except:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
-                                       bitmap_format = 'JPEG')
+                                       bitmap_format = 'jpeg')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self):
@@ -179,21 +181,21 @@ class OMR():
 
                     # Apply erosion.
                     kernel = np.ones(shape = (5,5),
-                                    dtype = np.uint8)
+                                     dtype = np.uint8)
                     erode = cv2.erode(src = thresh,
-                                    kernel = kernel,
-                                    iterations = 1)
+                                      kernel = kernel,
+                                      iterations = 1)
 
                     # Apply morphology open.
                     kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                    ksize = (25,25))
+                                                       ksize = (25,25))
                     first_morph = cv2.morphologyEx(src = erode, 
-                                                kernel = kernel, 
-                                                op = cv2.MORPH_OPEN)
+                                                   kernel = kernel, 
+                                                   op = cv2.MORPH_OPEN)
 
                     # Apply morphology close.
                     kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                    ksize = (7,7))
+                                                       ksize = (7,7))
                     second_morph = cv2.morphologyEx(src = first_morph,
                                                     kernel = kernel, 
                                                     op = cv2.MORPH_CLOSE)
@@ -252,9 +254,11 @@ class OMR():
         try:
             count = 0
             with open("src/output.txt", "w") as f:
-                for item in self._scanned_keys[0]:
+                # for item in self._scanned_keys[0]:
+                for item in self._sorted_keys[0]:
                     # f.write("%s %s \n" % (item[0], item[1]))
-                    f.write("%d: ((%s, %s), ), \n" % (count, item[0], item[1]))
+                    # f.write("%d: ((%s, %s), ), \n" % (count, item[0], item[1]))
+                    f.write("%d: (%s, %s)\n" % (count, item[0], item[1]))
                     count += 1
         except Exception as ex:
             print(ex)
