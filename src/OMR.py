@@ -13,10 +13,13 @@ class OMR():
                  pixel_differential:int = 30,
                  image_type: str = '.jpeg',
                  save_image_overlay: bool = False) -> None:
-        
+
+        # Possible user inputs.
         self.pixel_differential:int = pixel_differential
         self.image_type: str = image_type
         self.save_image_overlay: bool = save_image_overlay
+
+        # Created within and used by the class. 
         self._directories: list[str] = []
         self._keys_pdf_names: list[str] = []
         self._scantron_pdf_names: list[str] = []
@@ -24,7 +27,10 @@ class OMR():
         self._key_names: list[str]
         self._scanned_values: list = []
         self._scanned_keys: list = []
-        self._total_values: int = 155
+        self._sorted_keys: list = []
+        self._scanned_keys_average: tuple
+        self._key_column_index: tuple[int] = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
+        self._total_key_values: int = 155
 
         # self._score_sheet = pd.DataFrame(columns = scoring_columns)
 
@@ -64,10 +70,13 @@ class OMR():
                              image_names = self._scantron_names,
                              data = 'scantron')
         
+        self._sort_key_values()
+        # self._get_key_average()
         # Just for testing purposes. 
-        self.print_scanned_keys()
-        self.print_scanned_values()
-        self.write_to_file()
+        # self.print_scanned_keys()
+        # self.print_scanned_values()
+        self.print_sorted_keys()
+        # self.write_to_file()
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
@@ -114,16 +123,31 @@ class OMR():
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.png'
                         images[j].save(fp = location,
                                        bitmap_format = 'PNG')
+                    elif self.image_type == '.bmp':
+                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.bmp'
+                        images[j].save(fp = location,
+                                       bitmap_format = 'BMP')
                     else:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
                                        bitmap_format = 'JPEG')
 
+#-----------------------------------------------------------------------------------------------------------------------
+    def _sort_key_values(self):
+        temp_sorted_key_values = []
+        for key in self._scanned_keys: # Looping through each key
+            temp_key_sorted = []
+            for i in range(len(self._key_column_index)): # Sorting out each 'column'
+                if i == (len(self._key_column_index) - 1):
+                    temp_column = key[self._key_column_index[i]: (self._total_key_values + 1)]
+                else:
+                    temp_column = key[self._key_column_index[i]: self._key_column_index[i+1]]
+                temp_key_sorted += sorted(temp_column, key = lambda x: x[1]) # Sorting the column. TODO Move the\
+            temp_sorted_key_values.append(temp_key_sorted) # Adding the list of each key to the mega list.
+        self._sorted_keys = temp_sorted_key_values
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_keys_averages(self):
-        # TODO Do this for the completely filled out forms
-        # Also try and figure out the RMS for all of them
+    def _get_key_average(self):
         pass
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -215,6 +239,14 @@ class OMR():
         print(len(self._scanned_keys))
         for i in range(len(self._scanned_keys)):
             print(len(self._scanned_keys[i]))
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def print_sorted_keys(self):
+        print(type(self._sorted_keys))
+        print(len(self._sorted_keys))
+        for i in range(len(self._sorted_keys)):
+            print(len(self._sorted_keys[i]))
+        print(self._sorted_keys)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):
