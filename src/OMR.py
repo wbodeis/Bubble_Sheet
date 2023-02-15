@@ -103,7 +103,7 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_image_names(self):
-        self._key_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+        self._key_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_scantron_pdf_names(self):
@@ -111,7 +111,7 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_scantron_image_names(self):
-        self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
+        self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_CPU_threads(self):
