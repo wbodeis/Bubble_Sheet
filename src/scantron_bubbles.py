@@ -156,8 +156,8 @@ bubble_location: dict = {
 140: ((4791, 1494), 'Team Deca Eight'),
 141: ((4791, 1674), 'Team Eight'),
 # Column 15
-142: ((5080, 424), 'Match Nine'),
-143: ((5080, 603), 'Match Deca Nine'),
+142: ((5080, 424), 'Match Deca Nine'),
+143: ((5080, 603), 'Match Nine'),
 144: ((5080, 1138), 'Team Kilo Nine'),
 145: ((5080, 1316), 'Team Hecto Nine'),
 146: ((5080, 1494), 'Team Deca Nine'),
