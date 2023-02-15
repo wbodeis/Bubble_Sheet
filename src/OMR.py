@@ -16,13 +16,13 @@ class OMR():
 
         # Possible user inputs.
         self.pixel_differential:int = pixel_differential
-        self.image_type: str = image_type
+        self.image_format: str = image_type
         self.save_image_overlay: bool = save_image_overlay
 
         # Created within and used by the class. 
         self._directories: list[str] = []
-        self._keys_pdf_names: list[str] = []
-        self._scantron_pdf_names: list[str] = []
+        self._keys_pdf_names: list[str]
+        self._scantron_pdf_names: list[str]
         self._scantron_names: list[str]
         self._key_names: list[str]
         self._scanned_values: list = []
@@ -114,6 +114,13 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.jpeg') or i.endswith('.jpg') or i.endswith('.png'))]
 
 #-----------------------------------------------------------------------------------------------------------------------
+    def _get_CPU_threads(self):
+        try:
+            self._cpu_threads = os.cpu_count()
+        except:
+            self._cpu_threads = 1
+
+#-----------------------------------------------------------------------------------------------------------------------
     # TODO Fix so that it works with the keys and scantrons.
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
@@ -125,9 +132,9 @@ class OMR():
 
                 for j in range(len(images)):
                     try:
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_type
+                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_format
                         images[j].save(fp = location,
-                                       bitmap_format = self.image_type)
+                                       bitmap_format = self.image_format)
                     except:
                         location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
