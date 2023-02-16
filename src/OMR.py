@@ -12,12 +12,14 @@ class OMR():
     def __init__(self,
                  pixel_differential: int = 30,
                  image_type: str = 'jpeg',
-                 save_image_overlay: bool = False) -> None:
+                 save_image_overlay: bool = False,
+                 mark_color: str = 'blue') -> None:
 
         # Possible user inputs.
         self.pixel_differential:int = pixel_differential
         self.image_format: str = image_type
         self.save_image_overlay: bool = save_image_overlay
+        self.mark_color: str = mark_color
 
         # Created within and used by the class. 
         self._directories: list[str] = []
@@ -68,12 +70,16 @@ class OMR():
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         self._process_images(image_directory = 1, 
                              image_names = self._key_names, 
-                             data = 'key')
+                             data = 'key',
+                             color = self.mark_color
+                             )
 
         # Getting the values from the game sheets. 
         self._process_images(image_directory = 3,
                              image_names = self._scantron_names,
-                             data = 'scantron')
+                             data = 'scantron',
+                             color = self.mark_color
+                             )
         
         self._sort_key_values()
         self._get_key_average()
@@ -172,8 +178,12 @@ class OMR():
         self._scanned_keys_average = tuple(temp_key_average)
 
 #-----------------------------------------------------------------------------------------------------------------------
+    def _update_scantron_bubbles(self):
+        pass
+
+#-----------------------------------------------------------------------------------------------------------------------
     # TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
-    def _process_images(self, image_directory, image_names, data):
+    def _process_images(self, image_directory, image_names, data, color):
             for i in range(len(image_names)):
                 try:
                     marks = []
@@ -181,9 +191,12 @@ class OMR():
                     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
                     # Threshold for blue.
-                    lower_range = np.array([110,50,50])
-                    upper_range = np.array([130,255,255])
-
+                    if color == 'blue':
+                        lower_range = np.array([110,50,50])
+                        upper_range = np.array([130,255,255])
+                    else:
+                        lower_range = np.array([110,50,50])
+                        upper_range = np.array([130,255,255])
                     # Threshold for green.
                     # lower_range = np.array([36, 25, 25])
                     # upper_range = np.array([70, 255,255])
