@@ -10,7 +10,7 @@ from pdf2image import convert_from_path
 
 class OMR():
     def __init__(self,
-                 pixel_differential:int = 30,
+                 pixel_differential: int = 30,
                  image_type: str = 'jpeg',
                  save_image_overlay: bool = False) -> None:
 
@@ -76,12 +76,14 @@ class OMR():
                              data = 'scantron')
         
         self._sort_key_values()
-        # self._get_key_average()
+        self._get_key_average()
         # Just for testing purposes. 
         # self.print_scanned_keys()
         # self.print_scanned_values()
-        self.print_sorted_keys()
+        # self.print_sorted_keys()
         # self.write_to_file()
+        # print(self._scanned_keys[0][136:142])
+        self.print_averaged_key()
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
@@ -121,7 +123,6 @@ class OMR():
             self._cpu_threads = 1
 
 #-----------------------------------------------------------------------------------------------------------------------
-    # TODO Fix so that it works with the keys and scantrons.
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
         for i in range(len(pdf_names)):
@@ -150,14 +151,25 @@ class OMR():
                     temp_column = key[self._key_column_index[i]: (self._total_key_values + 1)]
                 else:
                     temp_column = key[self._key_column_index[i]: self._key_column_index[i+1]]
-                temp_key_sorted += sorted(temp_column, key = lambda x: x[1]) # Sorting the column. TODO Move the\
+                temp_key_sorted += sorted(temp_column, key = lambda x: x[1]) # Sorting the column.
             temp_sorted_key_values.append(temp_key_sorted) # Adding the list of each key to the mega list.
         self._sorted_key_values = temp_sorted_key_values
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_average(self):
-        temp_sum: int
-        pass
+        temp_key_average: list = []
+        for i in range(self._total_key_values):
+            temp_x_sum: int = 0
+            temp_y_sum: int = 0
+            temp_average_x: int = 0
+            temp_average_y: int = 0
+            for j in range(len(self._sorted_key_values)):
+                temp_x_sum += self._sorted_key_values[j][i][0]
+                temp_y_sum += self._sorted_key_values[j][i][1]
+            temp_average_x = int(temp_x_sum / len(self._sorted_key_values))
+            temp_average_y = int(temp_y_sum / len(self._sorted_key_values))
+            temp_key_average.append(tuple((temp_average_x, temp_average_y)))
+        self._scanned_keys_average = tuple(temp_key_average)
 
 #-----------------------------------------------------------------------------------------------------------------------
     # TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
@@ -255,6 +267,12 @@ class OMR():
         print(len(self._sorted_key_values))
         for i in range(len(self._sorted_key_values)):
             print(len(self._sorted_key_values[i]))
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def print_averaged_key(self):
+        print(type(self._scanned_keys_average))
+        print(len(self._scanned_keys_average))
+        print(self._scanned_keys_average)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def write_to_file(self):

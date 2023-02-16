@@ -6,8 +6,8 @@
 
 class Scantron():
     def __init__(self,
-                 OMR_list: list) -> None:
-        self._OMR_list = OMR_list
+                 OMR_data: tuple) -> None:
+        self._OMR_list = OMR_data
 
     def _determine_team_number(self):
         pass
