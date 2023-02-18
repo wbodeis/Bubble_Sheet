@@ -7,12 +7,12 @@ Poetry was used for creating and running the enviroment for this project.
 > [Poetry Homepage](https://python-poetry.org/)
 
 # Dependencies
-python = ">=3.10,<3.12"
-numpy = "^1.24.1"
-opencv-python = "^4.7.0.68"
-pillow = "^9.4.0"
-pdf2image = "^1.16.2"
-pandas = "^1.5.3"
+python = ">=3.10,<3.12"  
+numpy = "^1.24.1"  
+opencv-python = "^4.7.0.68"  
+pillow = "^9.4.0"  
+pdf2image = "^1.16.2"  
+pandas = "^1.5.3"  
 
 ## Folders
 You need the following folders:  
