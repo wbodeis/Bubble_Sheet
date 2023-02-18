@@ -6,7 +6,7 @@ Author: William Bodeis <wdbodeis@gmail.com>
 Poetry was used for creating and running the enviroment for this project.  
 > [Poetry Homepage](https://python-poetry.org/)
 
-# Dependencies
+### Dependencies
 python = ">=3.10,<3.12"  
 numpy = "^1.24.1"  
 opencv-python = "^4.7.0.68"  
