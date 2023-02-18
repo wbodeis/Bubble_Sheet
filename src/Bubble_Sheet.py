@@ -10,7 +10,7 @@ from Scantron import Scantron
 class Bubble_Sheet():
     def __init__(self,
                  pixel_differential: int = 50) -> None:
-                 
+
         self.pixel_differential = pixel_differential
         self._cpu_threads: int
         self._total_data: OMR
@@ -40,8 +40,8 @@ class Bubble_Sheet():
         
         self._df = pd.DataFrame(self._game_sheet_data)
         print(self._df)
-        # print(self._game_sheets[1])
-        # print(self._processed_game_sheets[1]._raw_data['u'])
+        # self._df.to_csv(path_or_buf = 'results/results.csv',
+        #                 index = False)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_CPU_threads(self):
