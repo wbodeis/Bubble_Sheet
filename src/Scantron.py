@@ -9,6 +9,7 @@ class Scantron():
                  scantron_data: tuple,
                  bubble_location: dict,
                  pixel_differential: int) -> None:
+
         self._scantron_data = scantron_data
         self._bubble_location = bubble_location
         self.pixel_differential = pixel_differential
@@ -18,78 +19,78 @@ class Scantron():
                                 'Team': [0, 0],
                                 'Match': [1, 0],
                                 'Alliance': [2, 0],
-                                'HP TL': [3, 0],
-                                'HP ML': [4, 0],
-                                'HP LLCube': [5, 0],
-                                'HP LLCone': [6, 0],
-                                'HP TM ': [7, 0],
-                                'HP MM': [8, 0],
-                                'HP MLCube': [9, 0],
-                                'HP MLCone': [10, 0],
-                                'HP TR': [11, 0],
-                                'HP MR': [12, 0],
-                                'HP LRCube': [13, 0],
-                                'HP LRCone': [14, 0],
-                                'M TL': [15, 0],
-                                'M ML': [16, 0],
-                                'M LLCube': [17, 0],
-                                'M LLCone': [18, 0],
-                                'M TM ': [19, 0],
-                                'M MM': [20, 0],
-                                'M MLCube': [21, 0],
-                                'M MLCone': [22, 0],
-                                'M TR': [23, 0],
-                                'M MR': [24, 0],
-                                'M LRCube': [25, 0],
-                                'M LRCone': [26, 0],
-                                'ST TL': [27, 0],
-                                'ST ML': [28, 0],
-                                'ST LLCube': [29, 0],
-                                'ST LLCone': [30, 0],
-                                'ST TM ': [31, 0],
-                                'ST MM': [32, 0],
-                                'ST MLCube': [33, 0],
-                                'ST MLCone': [34, 0],
-                                'ST TR': [35, 0],
-                                'ST MR': [36, 0],
-                                'ST LRCube': [37, 0],
-                                'ST LRCone': [38, 0],
-                                'HP TL': [39, 0],
-                                'HP ML': [40, 0],
-                                'HP LLCube': [41, 0],
-                                'HP LLCone': [42, 0],
-                                'HP TM ': [43, 0],
-                                'HP MM': [44, 0],
-                                'HP MLCube': [45, 0],
-                                'HP MLCone': [46, 0],
-                                'HP TR': [47, 0],
-                                'HP MR': [48, 0],
-                                'HP LRCube': [49, 0],
-                                'HP LRCone': [50, 0],
-                                'M TL': [51, 0],
-                                'M ML': [52, 0],
-                                'M LLCube': [53, 0],
-                                'M LLCone': [54, 0],
-                                'M TM ': [55, 0],
-                                'M MM': [56, 0],
-                                'M MLCube': [57, 0],
-                                'M MLCone': [58, 0],
-                                'M TR': [59, 0],
-                                'M MR': [60, 0],
-                                'M LRCube': [61, 0],
-                                'M LRCone': [62, 0],
-                                'ST TL': [63, 0],
-                                'ST ML': [64, 0],
-                                'ST LLCube': [65, 0],
-                                'ST LLCone': [66, 0],
-                                'ST TM ': [67, 0],
-                                'ST MM': [68, 0],
-                                'ST MLCube': [69, 0],
-                                'ST MLCone': [70, 0],
-                                'ST TR': [71, 0],
-                                'ST MR': [72, 0],
-                                'ST LRCube': [73, 0],
-                                'ST LRCone': [74, 0],
+                                'Auton HP TL': [3, 0],
+                                'Auton HP ML': [4, 0],
+                                'Auton HP LLCube': [5, 0],
+                                'Auton HP LLCone': [6, 0],
+                                'Auton HP TM ': [7, 0],
+                                'Auton HP MM': [8, 0],
+                                'Auton HP MLCube': [9, 0],
+                                'Auton HP MLCone': [10, 0],
+                                'Auton HP TR': [11, 0],
+                                'Auton HP MR': [12, 0],
+                                'Auton HP LRCube': [13, 0],
+                                'Auton HP LRCone': [14, 0],
+                                'Auton M TL': [15, 0],
+                                'Auton M ML': [16, 0],
+                                'Auton M LLCube': [17, 0],
+                                'Auton M LLCone': [18, 0],
+                                'Auton M TM ': [19, 0],
+                                'Auton M MM': [20, 0],
+                                'Auton M MLCube': [21, 0],
+                                'Auton M MLCone': [22, 0],
+                                'Auton M TR': [23, 0],
+                                'Auton M MR': [24, 0],
+                                'Auton M LRCube': [25, 0],
+                                'Auton M LRCone': [26, 0],
+                                'Auton ST TL': [27, 0],
+                                'Auton ST ML': [28, 0],
+                                'Auton ST LLCube': [29, 0],
+                                'Auton ST LLCone': [30, 0],
+                                'Auton ST TM ': [31, 0],
+                                'Auton ST MM': [32, 0],
+                                'Auton ST MLCube': [33, 0],
+                                'Auton ST MLCone': [34, 0],
+                                'Auton ST TR': [35, 0],
+                                'Auton ST MR': [36, 0],
+                                'Auton ST LRCube': [37, 0],
+                                'Auton ST LRCone': [38, 0],
+                                'Tele HP TL': [39, 0],
+                                'Tele HP ML': [40, 0],
+                                'Tele HP LLCube': [41, 0],
+                                'Tele HP LLCone': [42, 0],
+                                'Tele HP TM ': [43, 0],
+                                'Tele HP MM': [44, 0],
+                                'Tele HP MLCube': [45, 0],
+                                'Tele HP MLCone': [46, 0],
+                                'Tele HP TR': [47, 0],
+                                'Tele HP MR': [48, 0],
+                                'Tele HP LRCube': [49, 0],
+                                'Tele HP LRCone': [50, 0],
+                                'Tele M TL': [51, 0],
+                                'Tele M ML': [52, 0],
+                                'Tele M LLCube': [53, 0],
+                                'Tele M LLCone': [54, 0],
+                                'Tele M TM ': [55, 0],
+                                'Tele M MM': [56, 0],
+                                'Tele M MLCube': [57, 0],
+                                'Tele M MLCone': [58, 0],
+                                'Tele M TR': [59, 0],
+                                'Tele M MR': [60, 0],
+                                'Tele M LRCube': [61, 0],
+                                'Tele M LRCone': [62, 0],
+                                'Tele ST TL': [63, 0],
+                                'Tele ST ML': [64, 0],
+                                'Tele ST LLCube': [65, 0],
+                                'Tele ST LLCone': [66, 0],
+                                'Tele ST TM ': [67, 0],
+                                'Tele ST MM': [68, 0],
+                                'Tele ST MLCube': [69, 0],
+                                'Tele ST MLCone': [70, 0],
+                                'Tele ST TR': [71, 0],
+                                'Tele ST MR': [72, 0],
+                                'Tele ST LRCube': [73, 0],
+                                'Tele ST LRCone': [74, 0],
                                 'Community': [75, 0],
                                 'Charge Station': [76, 0],
                                 'Floor': [77, 0],
@@ -170,7 +171,7 @@ class Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_team_number(self):
         temp_team_name: list = [0,0,0,0]
-
+        count: int = 0
         for i in range(len(self._scantron_data)):
             temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
             temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
@@ -181,18 +182,21 @@ class Scantron():
                 temp_key_x = self._bubble_location[j][0][0]
                 temp_key_y = self._bubble_location[j][0][1]
 
-                if (temp_key_x <= temp_x_upper  
-                    and  temp_key_x >= temp_x_lower
+                if ((temp_key_x <= temp_x_upper  
+                    and temp_key_x >= temp_x_lower
                     and temp_key_y <= temp_y_upper
-                    and temp_key_y >= temp_y_lower):
-                    temp_team_name[self._team_number_location[j][1]] = self._team_number_location[j][0]
-                    continue
+                    and temp_key_y >= temp_y_lower)
+                    and j in self._team_number_location):
+                        temp_team_name[self._team_number_location[j][1]] = self._team_number_location[j][0]
+                        continue
+            if count == 4:
+                break
         self._raw_data['Team'][1] = ''.join(str(e) for e in temp_team_name)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_match_numbner(self):
         temp_match: list = [0,0]
-
+        count: int = 0
         for i in range(len(self._scantron_data)):
             temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
             temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
@@ -203,13 +207,16 @@ class Scantron():
                 temp_key_x = self._bubble_location[j][0][0]
                 temp_key_y = self._bubble_location[j][0][1]
 
-                if (temp_key_x <= temp_x_upper  
-                        and  temp_key_x >= temp_x_lower
-                        and temp_key_y <= temp_y_upper
-                        and temp_key_y >= temp_y_lower):
-                        temp_team_name[self._team_number_location[j][1]] = self._team_number_location[j][0]
+                if ((temp_key_x <= temp_x_upper  
+                     and  temp_key_x >= temp_x_lower
+                     and temp_key_y <= temp_y_upper
+                     and temp_key_y >= temp_y_lower)
+                     and j in self._match_number_location):
+                        temp_match[self._match_number_location[j][1]] = self._match_number_location[j][0]
+                        count += 1
                         continue
-
+            if count == 2:
+                break
         self._raw_data['Match'][1] = ''.join(str(e) for e in temp_match)
 
 #-----------------------------------------------------------------------------------------------------------------------

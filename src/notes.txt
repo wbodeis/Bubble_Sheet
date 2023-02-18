@@ -1,0 +1,2 @@
+Values to be used for the alliance
+ - e.g. 0 and 1 or the actual name?

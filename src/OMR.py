@@ -9,12 +9,14 @@ from pdf2image import convert_from_path
 
 class OMR():
     def __init__(self,
-                 image_type: str = 'jpeg',
+                 cpu_threads: int,
+                 image_format: str = 'jpeg',
                  save_image_overlay: bool = False,
                  mark_color: str = 'blue') -> None:
 
         # Possible user inputs.
-        self.image_format: str = image_type
+        self.cpu_threads: int = cpu_threads
+        self.image_format: str = image_format
         self.save_image_overlay: bool = save_image_overlay
         self.mark_color: str = mark_color
 
@@ -30,7 +32,6 @@ class OMR():
         self._scanned_keys_average: tuple
         self._key_column_index: tuple(int) = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
         self._total_key_values: int = 155
-        self._cpu_threads: int
         self._bubble_location: dict = {
                                         # Column 1
                                         0: [(1027, 2578), 'Auton HP TL'],
@@ -211,7 +212,6 @@ class OMR():
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
-        self._get_CPU_threads()
 
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf.')
@@ -290,20 +290,13 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_CPU_threads(self):
-        try:
-            self._cpu_threads = os.cpu_count()
-        except:
-            self._cpu_threads = 1
-
-#-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
 
         for i in range(len(pdf_names)):
                 images = convert_from_path(pdf_path = self._directories[pdf_directory] + pdf_names[i],
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
-                                           thread_count = self._cpu_threads)
+                                           thread_count = self.cpu_threads)
 
                 for j in range(len(images)):
                     try:
@@ -478,7 +471,3 @@ class OMR():
                     count += 1
         except Exception as ex:
             print(ex)
-        
-#-----------------------------------------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    OMR()
