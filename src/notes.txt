@@ -1,2 +1,5 @@
 Values to be used for the alliance
  - e.g. 0 and 1 or the actual name?
+
+Make sure the values in Scantron, especially _determine_play_style() are how AJ wants to be set up. 
+self._raw_data['Parked'] should be 1 or 0 when parked? 

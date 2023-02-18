@@ -4,7 +4,7 @@
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
 
-import os, cv2, numpy as np, pandas as pd
+import os, cv2, numpy as np
 from pdf2image import convert_from_path
 
 class OMR():
@@ -212,7 +212,6 @@ class OMR():
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
-
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf.')
         else:
@@ -227,13 +226,13 @@ class OMR():
         self._get_key_image_names()
         self._get_scantron_image_names()
         # TODO Uncomment once this is finalized. 
-        # if not self._key_names:
-        #     del self
-        #     raise FileExistsError('No image for key(s) to process were found.')
-        # if not self._scantron_names:
-        #     del self
-        #     raise FileExistsError('No image for game sheets(s) to process were found.')
-
+        if not self._key_names:
+            del self
+            raise FileExistsError('No image for key(s) to process were found.')
+        if not self._scantron_names:
+            del self
+            raise FileExistsError('No image for game sheets(s) to process were found.')
+        
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         self._process_images(image_directory = 1, 
                              image_names = self._key_names, 
@@ -251,13 +250,6 @@ class OMR():
         self._sort_key_values()
         self._get_key_average()
         self._update_scantron_bubbles()
-        # Just for testing purposes. 
-        # self.print_scanned_keys()
-        # self.print_scanned_values()
-        # self.print_sorted_keys()
-        # self.write_to_file()
-        # print(self._scanned_keys[0][136:142])
-        # self.print_averaged_key()
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
@@ -268,29 +260,29 @@ class OMR():
         self._directories.append('results/')            # 4
         
 #-----------------------------------------------------------------------------------------------------------------------
-    def _check_directories(self):
+    def _check_directories(self) -> None:
         for directory in self._directories:
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_key_pdf_names(self):
+    def _get_key_pdf_names(self) -> None:
         self._keys_pdf_names = [i for i in os.listdir(self._directories[0]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_key_image_names(self):
+    def _get_key_image_names(self) -> None:
         self._key_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_scantron_pdf_names(self):
+    def _get_scantron_pdf_names(self) -> None:
         self._scantron_pdf_names = [i for i in os.listdir(self._directories[2]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_scantron_image_names(self):
+    def _get_scantron_image_names(self) -> None:
         self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names):
+    def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names) -> None:
 
         for i in range(len(pdf_names)):
                 images = convert_from_path(pdf_path = self._directories[pdf_directory] + pdf_names[i],
@@ -309,7 +301,7 @@ class OMR():
                                        bitmap_format = 'jpeg')
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _sort_key_values(self):
+    def _sort_key_values(self) -> None:
         temp_sorted_key_values: list = []
         for key in self._scanned_keys: # Looping through each key
             temp_key_sorted = []
@@ -323,7 +315,8 @@ class OMR():
         self._sorted_key_values = temp_sorted_key_values
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _get_key_average(self):
+    def _get_key_average(self) -> None:
+        # TODO Try-except for if the keys don't have the total (155) marks/indicated values. 
         temp_key_average: list = []
         for i in range(self._total_key_values):
             temp_x_sum: int = 0
@@ -345,7 +338,7 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     # TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
-    def _process_images(self, image_directory, image_names, data, color):
+    def _process_images(self, image_directory, image_names, data, color) -> None:
             for i in range(len(image_names)):
                 try:
                     marks = []
@@ -424,29 +417,41 @@ class OMR():
             
 #-----------------------------------------------------------------------------------------------------------------------
     def print_scanned_values(self):
-        print(type(self._scanned_values))
-        print(len(self._scanned_values))
+        print()
+        print('Scanned Values')
+        print('----------')
+        print('Type:', type(self._scanned_values))
+        print('Sheets scanned:', len(self._scanned_values))
         for i in range(len(self._scanned_values)):
-            print(len(self._scanned_values[i]))
+            print('Marks in sheet {}: {}'.format(i+1, len(self._scanned_values[i])))
 
 #-----------------------------------------------------------------------------------------------------------------------
     def print_scanned_keys(self):
-        print(type(self._scanned_keys))
-        print(len(self._scanned_keys))
+        print()
+        print('Scanned Keys')
+        print('----------')
+        print('Type:', type(self._scanned_keys))
+        print('Keys scanned:', len(self._scanned_keys))
         for i in range(len(self._scanned_keys)):
             print(len(self._scanned_keys[i]))
 
 #-----------------------------------------------------------------------------------------------------------------------
     def print_sorted_keys(self):
-        print(type(self._sorted_key_values))
-        print(len(self._sorted_key_values))
+        print()
+        print('Sorted Keys')
+        print('----------')
+        print('Type:', type(self._sorted_key_values))
+        print('Sorted Key Values:', len(self._sorted_key_values))
         for i in range(len(self._sorted_key_values)):
             print(len(self._sorted_key_values[i]))
 
 #-----------------------------------------------------------------------------------------------------------------------
     def print_averaged_key(self):
-        print(type(self._scanned_keys_average))
-        print(len(self._scanned_keys_average))
+        print()
+        print('Sorted Keys')
+        print('----------')
+        print('Type:', type(self._scanned_keys_average))
+        print('Averaged Key Values:', len(self._scanned_keys_average))
         print(self._scanned_keys_average)
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -456,18 +461,3 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def get_scantron_values(self) -> list:
         return self._scanned_values
-
-#-----------------------------------------------------------------------------------------------------------------------
-    def write_to_file(self):
-        try:
-            count = 0
-            with open("src/output.txt", "w") as f:
-                # for item in self._scanned_keys[0]:
-                for item in self._scanned_keys_average:
-                    # f.write("%s %s \n" % (item[0], item[1]))
-                    # f.write("%d: ((%s, %s), ), \n" % (count, item[0], item[1]))
-                    # f.write("%d: (%s, %s)\n" % (count, item[0], item[1]))
-                    f.write("%d: (%s, %s)\n" % (count, item[0] ))
-                    count += 1
-        except Exception as ex:
-            print(ex)
