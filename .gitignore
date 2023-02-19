@@ -7,3 +7,4 @@ scantron_images/
 results/
 testing/
 poppler/
+src/__pycache__/
