@@ -14,7 +14,7 @@ class Bubble_Sheet():
         self.pixel_differential = pixel_differential
         self._cpu_threads: int
         self._total_data: OMR
-        self._key_values: dict
+        self._bubble_location: dict
         self._game_sheets: list
         self._processed_game_sheets: list[Scantron] = []
         self._game_sheet_data: list[dict] = []
@@ -26,19 +26,19 @@ class Bubble_Sheet():
 #-----------------------------------------------------------------------------------------------------------------------
     def main(self):
         self._total_data = OMR(cpu_threads = self._cpu_threads)
-        self._key_values = self._total_data.get_key_values()
+        self._bubble_location = self._total_data.get_key_values()
         self._game_sheets = self._total_data.get_scantron_values()
 
         # TODO Figure out the processing pool to multithread the processing. 
-        for i in range(len(self._game_sheets)):
-            self._processed_game_sheets.append(Scantron(scantron_data = self._game_sheets[i],
-                                                        bubble_location = self._key_values, 
+        for sheet in self._game_sheets:
+            self._processed_game_sheets.append(Scantron(scantron_data = sheet,
+                                                        bubble_location = self._bubble_location, 
                                                         pixel_differential = self.pixel_differential)
             )
         for sheet in self._processed_game_sheets:
             self._game_sheet_data.append(sheet._get_raw_data())
         
-        self._df = pd.DataFrame(self._game_sheet_data)
+        self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         print(self._df)
         # self._df.to_csv(path_or_buf = 'results/results.csv',
         #                 index = False)

@@ -23,7 +23,7 @@ class Scantron():
                                 'Auton HP ML': [4, 0],
                                 'Auton HP LLCube': [5, 0],
                                 'Auton HP LLCone': [6, 0],
-                                'Auton HP TM ': [7, 0],
+                                'Auton HP TM': [7, 0],
                                 'Auton HP MM': [8, 0],
                                 'Auton HP MLCube': [9, 0],
                                 'Auton HP MLCone': [10, 0],
@@ -35,7 +35,7 @@ class Scantron():
                                 'Auton M ML': [16, 0],
                                 'Auton M LLCube': [17, 0],
                                 'Auton M LLCone': [18, 0],
-                                'Auton M TM ': [19, 0],
+                                'Auton M TM': [19, 0],
                                 'Auton M MM': [20, 0],
                                 'Auton M MLCube': [21, 0],
                                 'Auton M MLCone': [22, 0],
@@ -47,7 +47,7 @@ class Scantron():
                                 'Auton ST ML': [28, 0],
                                 'Auton ST LLCube': [29, 0],
                                 'Auton ST LLCone': [30, 0],
-                                'Auton ST TM ': [31, 0],
+                                'Auton ST TM': [31, 0],
                                 'Auton ST MM': [32, 0],
                                 'Auton ST MLCube': [33, 0],
                                 'Auton ST MLCone': [34, 0],
@@ -59,7 +59,7 @@ class Scantron():
                                 'Tele HP ML': [40, 0],
                                 'Tele HP LLCube': [41, 0],
                                 'Tele HP LLCone': [42, 0],
-                                'Tele HP TM ': [43, 0],
+                                'Tele HP TM': [43, 0],
                                 'Tele HP MM': [44, 0],
                                 'Tele HP MLCube': [45, 0],
                                 'Tele HP MLCone': [46, 0],
@@ -71,7 +71,7 @@ class Scantron():
                                 'Tele M ML': [52, 0],
                                 'Tele M LLCube': [53, 0],
                                 'Tele M LLCone': [54, 0],
-                                'Tele M TM ': [55, 0],
+                                'Tele M TM': [55, 0],
                                 'Tele M MM': [56, 0],
                                 'Tele M MLCube': [57, 0],
                                 'Tele M MLCone': [58, 0],
@@ -83,7 +83,7 @@ class Scantron():
                                 'Tele ST ML': [64, 0],
                                 'Tele ST LLCube': [65, 0],
                                 'Tele ST LLCone': [66, 0],
-                                'Tele ST TM ': [67, 0],
+                                'Tele ST TM': [67, 0],
                                 'Tele ST MM': [68, 0],
                                 'Tele ST MLCube': [69, 0],
                                 'Tele ST MLCone': [70, 0],
@@ -175,7 +175,7 @@ class Scantron():
                                             0: 'Auton HP TL',
                                             1: 'Auton HP ML',
                                             2: 'Auton HP LLCone',
-                                            3: 'Auton HP LLCube)',
+                                            3: 'Auton HP LLCube',
                                             4: 'Tele HP TL',
                                             5: 'Tele HP ML',
                                             6: 'Tele HP LLCone',
@@ -188,10 +188,10 @@ class Scantron():
                                             15: 'Tele HP MM',
                                             16: 'Tele HP MLCone',
                                             17: 'Tele HP MLCube',
-                                            18: 'Auton M TR',
-                                            19: 'Auton M MR',
-                                            20: 'Auton M LRCone',
-                                            21: 'Auton M LRCube',
+                                            18: 'Auton HP TR',
+                                            19: 'Auton HP MR',
+                                            20: 'Auton HP LRCone',
+                                            21: 'Auton HP LRCube',
                                             22: 'Tele HP TR',
                                             23: 'Tele HP MR',
                                             24: 'Tele HP LRCone',
@@ -243,9 +243,9 @@ class Scantron():
                                             120: 'Tele ST TR',
                                             121: 'Tele ST MR',
                                             122: 'Tele ST LRCone',
-                                            123: 'Tele ST LRCube',
+                                            123: 'Tele ST LRCube'
                                             }
-        self._play_style: dict = {
+        self._play_style_location: dict = {
                                 26: 'Floor Yes',
                                 27: 'Single Sub Yes',
                                 28: 'Double Sub Slider Yes',
@@ -274,10 +274,6 @@ class Scantron():
         self._determine_match_numbner()
         self._determine_alliance()
         self._determine_game_results()
-        # try:
-        #     print(self._raw_data['u'])
-        # except:
-        #     pass
         self._determine_play_style()
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -394,7 +390,7 @@ class Scantron():
                      and  temp_key_x >= temp_x_lower
                      and temp_key_y <= temp_y_upper
                      and temp_key_y >= temp_y_lower)
-                     and key in self._play_style):
+                     and key in self._play_style_location):
                         if key == 26:
                             self._raw_data['Floor'][1] = 1
                         elif key == 27:
@@ -435,9 +431,9 @@ class Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_raw_data(self) -> dict:
         temp_raw_data: dict = {}
-        for key in self._raw_data:
+        for key, values in self._raw_data.items():
             try:
-                temp_raw_data[key] = self._raw_data[key][1]
+                temp_raw_data[key] = values[1]
             except Exception as ex:
                 print(ex)
         return temp_raw_data
