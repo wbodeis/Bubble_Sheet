@@ -13,7 +13,7 @@ class Bubble_Sheet():
 
         self.pixel_differential = pixel_differential
         self._cpu_threads: int
-        self._total_data: OMR
+        self._OMR_data: OMR
         self._bubble_location: dict
         self._game_sheets: list
         self._processed_game_sheets: list[Scantron] = []
@@ -25,9 +25,9 @@ class Bubble_Sheet():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def main(self):
-        self._total_data = OMR(cpu_threads = self._cpu_threads)
-        self._bubble_location = self._total_data.get_key_values()
-        self._game_sheets = self._total_data.get_scantron_values()
+        self._OMR_data = OMR(cpu_threads = self._cpu_threads)
+        self._bubble_location = self._OMR_data.get_key_values()
+        self._game_sheets = self._OMR_data.get_game_sheet_values()
 
         # TODO Figure out the processing pool to multithread the processing. 
         for sheet in self._game_sheets:

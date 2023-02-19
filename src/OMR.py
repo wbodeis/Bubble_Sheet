@@ -459,5 +459,5 @@ class OMR():
         return self._bubble_location
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def get_scantron_values(self) -> list:
+    def get_game_sheet_values(self) -> list:
         return self._scanned_values
