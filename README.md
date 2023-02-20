@@ -9,6 +9,7 @@ It will also close if there aren't any keys or game sheets to be read in and use
 ## Environment
 Poetry was used for creating and running the environment for this project.  
 > [Poetry Homepage](https://python-poetry.org/)  
+
 The pyproject.toml was also included to be used or the dependencies are listed below to use with whatever your preferred environment may be.  
 
 ### Dependencies
@@ -51,10 +52,10 @@ It will convert pdf files to whatever file format you send, while defaulting to 
 It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
 It is setup to be used with blue ballpoint pens, but pencils may work. I haven't tested them to say for certain that they will.  
 It uses the HSV for determining the color spectrum to test against and the snippet is what was used for 'blue.'  
-'''
+```
 lower_range = np.array([110,50,50])
 upper_range = np.array([130,255,255])
-'''
+```
   
 ### Scantron
 Class for creating an object of each game sheet scanned.  
