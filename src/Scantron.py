@@ -1,6 +1,6 @@
 #======================================================================================================================+
 # FIle:  Bubble_Sheet/src/Scantron.py
-# Project: OMR Scanrtron for FRC Team 5712
+# Project: OMR Scantron for FRC Team 5712
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
 
