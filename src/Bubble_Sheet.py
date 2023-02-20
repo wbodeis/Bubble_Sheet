@@ -32,7 +32,7 @@ class Bubble_Sheet():
 
         self._cpu_threads: int
         self._directories: list[str] = []
-        self._directory_check: bool = True
+        self._directory_check: bool = False
         self._OMR_data: OMR
         self._bubble_location: dict
         self._game_sheets: list
@@ -44,7 +44,7 @@ class Bubble_Sheet():
         self._get_CPU_threads()
         self._create_directories_list()
         self._check_directories()
-        if not self._directory_check:
+        if self._directory_check:
             del self
             raise FileNotFoundError('One or more of the required directories was not found. They were created so please double check and rerun the program.')
 
@@ -88,7 +88,6 @@ class Bubble_Sheet():
         self._directories.append('scantron/')           # 2
         self._directories.append('scantron_images/')    # 3
         self._directories.append('results/')            # 4
-        self._directories.append('poppler/')            # 5
         
 #-----------------------------------------------------------------------------------------------------------------------
     def _check_directories(self) -> None:
@@ -98,7 +97,7 @@ class Bubble_Sheet():
         """
         for directory in self._directories:
             if not os.path.exists(directory):
-                self._directory_check = False
+                self._directory_check = True
                 os.makedirs(directory)
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_CPU_threads(self):
