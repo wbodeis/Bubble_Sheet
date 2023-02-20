@@ -5,13 +5,27 @@
 #-----------------------------------------------------------------------------------------------------------------------
 
 class Scantron():
+    """
+    Class for creating an object of each game sheet scanned.
+    The various methods were broken out in attempt to make it more readable, while it could have just been one large one with a bunch of nested if statements.
+    Everything is determined against the pixel location of the averaged key value(s) that are gathered so the X and Y values fit with the given range of pixel_differential value. 
+    Everything is stored in the object and returned using _get_raw_data().
+    """
     def __init__(self,
                  scantron_data: tuple,
                  bubble_location: dict,
                  pixel_differential: int) -> None:
+        """_summary_
 
-        self._scantron_data = scantron_data
-        self._bubble_location = bubble_location
+        Args:
+            scantron_data (tuple): The data of the specific key or game sheet that the OMR class determined. 
+            bubble_location (dict): The location of every bubble from the key(s).
+            pixel_differential (int): The plus or minus that it will look for a corresponding mark in the bubble_location dictionary.  
+        """
+
+        # Class init values. 
+        self.scantron_data = scantron_data
+        self.bubble_location = bubble_location
         self.pixel_differential = pixel_differential
 
         # Dictionaries for storing the various results. 
@@ -278,15 +292,19 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_team_number(self) -> None:
+        """ 
+        Determinging the team's number. 
+        Defaults to 0000 if nothing was entered or detected. 
+        """
         temp_team_number: list = [0,0,0,0]
         count: int = 0
-        for i in range(len(self._scantron_data)):
-            temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
-            temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
-            temp_y_upper = self._scantron_data[i][1] + self.pixel_differential
-            temp_y_lower = self._scantron_data[i][1] - self.pixel_differential
+        for i in range(len(self.scantron_data)):
+            temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
+            temp_x_lower = self.scantron_data[i][0] - self.pixel_differential
+            temp_y_upper = self.scantron_data[i][1] + self.pixel_differential
+            temp_y_lower = self.scantron_data[i][1] - self.pixel_differential
 
-            for key, value in self._bubble_location.items():
+            for key, value in self.bubble_location.items():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
@@ -304,15 +322,19 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_match_numbner(self) -> None:
+        """ 
+        Determinging the match the team played in. 
+        Defaults to 00 if nothing was entered or detected. 
+        """
         temp_match_number: list = [0,0]
         count: int = 0
-        for i in range(len(self._scantron_data)):
-            temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
-            temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
-            temp_y_upper = self._scantron_data[i][1] + self.pixel_differential
-            temp_y_lower = self._scantron_data[i][1] - self.pixel_differential
+        for i in range(len(self.scantron_data)):
+            temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
+            temp_x_lower = self.scantron_data[i][0] - self.pixel_differential
+            temp_y_upper = self.scantron_data[i][1] + self.pixel_differential
+            temp_y_lower = self.scantron_data[i][1] - self.pixel_differential
 
-            for key, value in self._bubble_location.items():
+            for key, value in self.bubble_location.items():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
@@ -331,13 +353,14 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_alliance(self) -> None:
-        for i in range(len(self._scantron_data)):
-            temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
-            temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
-            temp_y_upper = self._scantron_data[i][1] + self.pixel_differential
-            temp_y_lower = self._scantron_data[i][1] - self.pixel_differential
+        """ Red or Blue alliance. """
+        for i in range(len(self.scantron_data)):
+            temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
+            temp_x_lower = self.scantron_data[i][0] - self.pixel_differential
+            temp_y_upper = self.scantron_data[i][1] + self.pixel_differential
+            temp_y_lower = self.scantron_data[i][1] - self.pixel_differential
 
-            for key, value in self._bubble_location.items():
+            for key, value in self.bubble_location.items():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
@@ -357,13 +380,16 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_game_results(self) -> None:
-        for i in range(len(self._scantron_data)):
-            temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
-            temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
-            temp_y_upper = self._scantron_data[i][1] + self.pixel_differential
-            temp_y_lower = self._scantron_data[i][1] - self.pixel_differential
+        """
+        The majority of the work is done in here for getting the results of where the team played their cones and cubes. 
+        """
+        for i in range(len(self.scantron_data)):
+            temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
+            temp_x_lower = self.scantron_data[i][0] - self.pixel_differential
+            temp_y_upper = self.scantron_data[i][1] + self.pixel_differential
+            temp_y_lower = self.scantron_data[i][1] - self.pixel_differential
 
-            for key, value in self._bubble_location.items():
+            for key, value in self.bubble_location.items():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
@@ -376,13 +402,18 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_play_style(self) -> None:
-        for i in range(len(self._scantron_data)):
-            temp_x_upper = self._scantron_data[i][0] + self.pixel_differential
-            temp_x_lower = self._scantron_data[i][0] - self.pixel_differential
-            temp_y_upper = self._scantron_data[i][1] + self.pixel_differential
-            temp_y_lower = self._scantron_data[i][1] - self.pixel_differential
+        """
+        For the last of the sundried pertaining to the game itself. 
+        Set as a bunch of ifs to make sure it works. 
+        TODO Change later once it is known to be working correctly. 
+        """
+        for i in range(len(self.scantron_data)):
+            temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
+            temp_x_lower = self.scantron_data[i][0] - self.pixel_differential
+            temp_y_upper = self.scantron_data[i][1] + self.pixel_differential
+            temp_y_lower = self.scantron_data[i][1] - self.pixel_differential
 
-            for key, value in self._bubble_location.items():
+            for key, value in self.bubble_location.items():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
@@ -430,6 +461,13 @@ class Scantron():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_raw_data(self) -> dict:
+        """ 
+        Taking the key and true value of the key. The first value is it's place in the google sheet in case the dict starts to get sorted for some reason, so there will be a way to know their positions. 
+        
+        Returns:
+            dict: Data that was collected and collated for each game sheet. 
+                  Each key should correlate directly the column in the raw data section of the gooogle sheet. 
+        """
         temp_raw_data: dict = {}
         for key, values in self._raw_data.items():
             try:

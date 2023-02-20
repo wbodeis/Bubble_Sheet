@@ -8,25 +8,48 @@ import os, cv2, numpy as np
 from pdf2image import convert_from_path
 
 class OMR():
+    """
+    Optical Mark Recognition (OMR)
+    The class is used in doing the heavy lifting for manipulating and collating the data.  
+    It will convert pdf files to whatever file format you send, while defaulting to jpeg.  
+    It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
+    """
     def __init__(self,
                  cpu_threads: int,
+                 directories: list[str],
                  image_format: str = 'jpeg',
                  save_image_overlay: bool = False,
                  mark_color: str = 'blue') -> None:
+        """_summary_
 
-        # Possible user inputs.
+        Args:
+            cpu_threads (int): Total CPU threads found and passed to it for converting the pdf files.
+            directories (list[str]): All of the folders where the data can be retrieved and saved. 
+            image_format (str, optional): The file type being saved from the pdf conversion.
+                                          Defaults to 'jpeg'.
+            save_image_overlay (bool, optional): While processing the images, it can save a 'dot' on each of the spots it finds mark to be saved in 'results/'. 
+                                                 Defaults to False.
+            mark_color (str, optional): You can use different colored pens or pencils for making the paper.
+                                        Defaults to 'blue'.
+
+        Raises:
+            FileExistsError: If no keys were found in the folders. 
+            FileExistsError: If no game sheets were found in the folders. 
+        """
+
+        # Class init values.
         self.cpu_threads: int = cpu_threads
         self.image_format: str = image_format
         self.save_image_overlay: bool = save_image_overlay
         self.mark_color: str = mark_color
+        self.directories: list[str] = directories
 
         # Created within and used by the class. 
-        self._directories: list[str] = []
         self._keys_pdf_names: list[str]
         self._scantron_pdf_names: list[str]
         self._scantron_names: list[str]
         self._key_names: list[str]
-        self._scanned_values: list = []
+        self._scanned_values: list[tuple] = []
         self._scanned_keys: list = []
         self._sorted_key_values: list = []
         self._scanned_keys_average: tuple
@@ -206,26 +229,22 @@ class OMR():
                                         }
 
         # Initializing functions.
-        self._create_directories_list()
-        self._check_directories()
-
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
         if not self._keys_pdf_names:
-            print('No keys were found to convert from a pdf.')
+            print('No keys were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
             self._convert_pdf_to_image(0, 1, self._keys_pdf_names)
 
         if not self._scantron_pdf_names:
-            print('No game sheets were found to convert from a pdf.')
+            print('No game sheets were found to convert from a pdf.Looking for {} image format.'.format(self.image_format))
         else:
             self._convert_pdf_to_image(2, 3, self._scantron_pdf_names)
         
         # Getting the names of the images to run the data. 
         self._get_key_image_names()
         self._get_scantron_image_names()
-        # TODO Uncomment once this is finalized. 
         if not self._key_names:
             del self
             raise FileExistsError('No image for key(s) to process were found.')
@@ -252,56 +271,60 @@ class OMR():
         self._update_scantron_bubbles()
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _create_directories_list(self):
-        self._directories.append('key/')                # 0
-        self._directories.append('key_images/')         # 1
-        self._directories.append('scantron/')           # 2
-        self._directories.append('scantron_images/')    # 3
-        self._directories.append('results/')            # 4
-        
-#-----------------------------------------------------------------------------------------------------------------------
-    def _check_directories(self) -> None:
-        for directory in self._directories:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-
-#-----------------------------------------------------------------------------------------------------------------------
     def _get_key_pdf_names(self) -> None:
-        self._keys_pdf_names = [i for i in os.listdir(self._directories[0]) if i.endswith('.pdf')]
+        """ Creating list of strings from the pdf files of keys. """
+        self._keys_pdf_names = [i for i in os.listdir(self.directories[0]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_image_names(self) -> None:
-        self._key_names = [i for i in os.listdir(self._directories[1]) if (i.endswith('.' + self.image_format))]
+        """ Creating list of strings from the image files of keys. """
+        self._key_names = [i for i in os.listdir(self.directories[1]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_scantron_pdf_names(self) -> None:
-        self._scantron_pdf_names = [i for i in os.listdir(self._directories[2]) if i.endswith('.pdf')]
+        """ Creating list of strings from the pdf files of game sheets. """
+        self._scantron_pdf_names = [i for i in os.listdir(self.directories[2]) if i.endswith('.pdf')]
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_scantron_image_names(self) -> None:
-        self._scantron_names = [i for i in os.listdir(self._directories[3]) if (i.endswith('.' + self.image_format))]
+        """ Creating list of strings from the image files of game sheets. """
+        self._scantron_names = [i for i in os.listdir(self.directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_image(self, pdf_directory, image_directory, pdf_names) -> None:
-
+    def _convert_pdf_to_image(self, pdf_directory: int, image_directory: int, pdf_names: list[str]) -> None:
+        """
+        Taking the various pdf files and converting them to an image of the specified file type from the class initi. 
+        Args:
+            pdf_directory (int): Index for the list of folder names.
+            image_directory (int): Index for the list of folder names.
+            pdf_names (list[str]): Names of the files to be converted from pdf. 
+        """
         for i in range(len(pdf_names)):
-                images = convert_from_path(pdf_path = self._directories[pdf_directory] + pdf_names[i],
+                images = convert_from_path(pdf_path = self.directories[pdf_directory] + pdf_names[i],
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
                                            thread_count = self.cpu_threads)
 
                 for j in range(len(images)):
                     try:
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_format
+                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_format
                         images[j].save(fp = location,
                                        bitmap_format = self.image_format)
                     except:
-                        location = self._directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
+                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
                         images[j].save(fp = location,
                                        bitmap_format = 'jpeg')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self) -> None:
+        """
+        Taking each of the keys and sorting them by their column and Y (ascending) values. 
+        OMR searches first by X then their Y pixel location so the order in the columns become mismatched. 
+        For example, the second tuple should be first as far as we are concerned, but it's X value is higher and moved further down. 
+        (10, 5)
+        (11, 2)
+        _bubble_location has each of them split off into their respective chunks and then get sorted that way.
+        """
         temp_sorted_key_values: list = []
         for key in self._scanned_keys: # Looping through each key
             temp_key_sorted = []
@@ -316,7 +339,11 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_average(self) -> None:
-        # TODO Try-except for if the keys don't have the total (155) marks/indicated values. 
+        """
+        Taking all of the keys that were found and averaging their values together.
+        Since they are going to be printed off and scanned, it will give a more realistic value versus creating it from filling in the blanks on a saved image. 
+        TODO Try-except (if-else?) for if the keys don't have the total (155) marks/indicated values.
+        """
         temp_key_average: list = []
         for i in range(self._total_key_values):
             temp_x_sum: int = 0
@@ -333,131 +360,114 @@ class OMR():
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _update_scantron_bubbles(self):
+        """
+        Taking the new values from _get_key_average() and updating the dict. 
+        These are to be used in Bubble_Sheet when it is passed to the game sheets to determine what was selected.
+        """
         for key in self._bubble_location:
             self._bubble_location[key][0] = self._scanned_keys_average[key]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    # TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
-    def _process_images(self, image_directory, image_names, data, color) -> None:
-            for i in range(len(image_names)):
-                try:
-                    marks = []
-                    img = cv2.imread(self._directories[image_directory] + image_names[i])
-                    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    def _process_images(self, image_directory: int, image_names: list[str], data: str, color: str) -> None:
+        """_summary_
 
-                    # Threshold for blue.
-                    if color == 'blue':
-                        lower_range = np.array([110,50,50])
-                        upper_range = np.array([130,255,255])
-                    else:
-                        lower_range = np.array([110,50,50])
-                        upper_range = np.array([130,255,255])
-                    # Threshold for green.
-                    # lower_range = np.array([36, 25, 25])
-                    # upper_range = np.array([70, 255,255])
+        Args:
+            image_directory (int): Index for the list of folder names.
+            image_names (list[str]): Names of the files to be read in and marked locations saved. 
+            data (str): Where the image is a key or game sheet.
+            color (str): The color range that the opencv tries to match.
+        TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
+        """
+        for i in range(len(image_names)):
+            try:
+                marks = []
+                img = cv2.imread(self.directories[image_directory] + image_names[i])
+                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-                    # Threshold for red.
-                    # lower = np.array([155,25,0])
-                    # upper = np.array([179,255,255])
+                # Threshold for blue.
+                if color == 'blue':
+                    lower_range = np.array([110,50,50])
+                    upper_range = np.array([130,255,255])
+                else:
+                    lower_range = np.array([110,50,50])
+                    upper_range = np.array([130,255,255])
+                # Threshold for green.
+                # lower_range = np.array([36, 25, 25])
+                # upper_range = np.array([70, 255,255])
 
-                    # Threshold for yellow.
-                    # lower = np.array([20,100,100])
-                    # upper = np.array([30,255,255])
+                # Threshold for red.
+                # lower = np.array([155,25,0])
+                # upper = np.array([179,255,255])
 
-                    thresh = cv2.inRange(hsv, lower_range, upper_range)
+                # Threshold for yellow.
+                # lower = np.array([20,100,100])
+                # upper = np.array([30,255,255])
 
-                    # Apply erosion.
-                    kernel = np.ones(shape = (5,5),
-                                     dtype = np.uint8)
-                    erode = cv2.erode(src = thresh,
-                                      kernel = kernel,
-                                      iterations = 1)
+                thresh = cv2.inRange(hsv, lower_range, upper_range)
 
-                    # Apply morphology open.
-                    kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                       ksize = (25,25))
-                    first_morph = cv2.morphologyEx(src = erode, 
-                                                   kernel = kernel, 
-                                                   op = cv2.MORPH_OPEN)
+                # Apply erosion.
+                kernel = np.ones(shape = (5,5),
+                                    dtype = np.uint8)
+                erode = cv2.erode(src = thresh,
+                                    kernel = kernel,
+                                    iterations = 1)
 
-                    # Apply morphology close.
-                    kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                       ksize = (7,7))
-                    second_morph = cv2.morphologyEx(src = first_morph,
-                                                    kernel = kernel, 
-                                                    op = cv2.MORPH_CLOSE)
+                # Apply morphology open.
+                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
+                                                    ksize = (25,25))
+                first_morph = cv2.morphologyEx(src = erode, 
+                                                kernel = kernel, 
+                                                op = cv2.MORPH_OPEN)
 
-                    # Get contours
-                    contours = cv2.findContours(image = second_morph,
-                                                mode = cv2.RETR_EXTERNAL,
-                                                method= cv2.CHAIN_APPROX_NONE)
-                    contours = contours[0] if len(contours) == 2 else contours[1]
+                # Apply morphology close.
+                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
+                                                    ksize = (7,7))
+                second_morph = cv2.morphologyEx(src = first_morph,
+                                                kernel = kernel, 
+                                                op = cv2.MORPH_CLOSE)
+
+                # Get contours
+                contours = cv2.findContours(image = second_morph,
+                                            mode = cv2.RETR_EXTERNAL,
+                                            method= cv2.CHAIN_APPROX_NONE)
+                contours = contours[0] if len(contours) == 2 else contours[1]
+                if self.save_image_overlay:
+                    result = img.copy() 
+                for contour in contours:
+                    M = cv2.moments(contour)
+                    cx = int(M["m10"] / M["m00"])
+                    cy = int(M["m01"] / M["m00"])
+                    pt = (cx,cy)
+                    marks.append(pt)
                     if self.save_image_overlay:
-                        result = img.copy() 
-                    for contour in contours:
-                        M = cv2.moments(contour)
-                        cx = int(M["m10"] / M["m00"])
-                        cy = int(M["m01"] / M["m00"])
-                        pt = (cx,cy)
-                        marks.append(pt)
-                        if self.save_image_overlay:
-                            cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
-                    if data == 'key' and self.save_image_overlay:
-                        self._scanned_keys.append(tuple(sorted(marks)))
-                        cv2.imwrite(('results/' + 'key_overlay_' + str(i) + '.jpeg'), result)
-                    elif data == 'key':
-                        self._scanned_keys.append(tuple(sorted(marks)))
-                    elif data == 'scantron' and self.save_image_overlay:
-                        self._scanned_values.append(tuple(sorted(marks)))
-                        cv2.imwrite(('results/' + 'scantron_overlay_' + str(i) + '.jpeg'), result)
-                    elif data == 'scantron':
-                        self._scanned_values.append(tuple(sorted(marks)))
-                except Exception as ex:
-                    print(ex)
-            
-#-----------------------------------------------------------------------------------------------------------------------
-    def print_scanned_values(self):
-        print()
-        print('Scanned Values')
-        print('----------')
-        print('Type:', type(self._scanned_values))
-        print('Sheets scanned:', len(self._scanned_values))
-        for i in range(len(self._scanned_values)):
-            print('Marks in sheet {}: {}'.format(i+1, len(self._scanned_values[i])))
-
-#-----------------------------------------------------------------------------------------------------------------------
-    def print_scanned_keys(self):
-        print()
-        print('Scanned Keys')
-        print('----------')
-        print('Type:', type(self._scanned_keys))
-        print('Keys scanned:', len(self._scanned_keys))
-        for i in range(len(self._scanned_keys)):
-            print(len(self._scanned_keys[i]))
-
-#-----------------------------------------------------------------------------------------------------------------------
-    def print_sorted_keys(self):
-        print()
-        print('Sorted Keys')
-        print('----------')
-        print('Type:', type(self._sorted_key_values))
-        print('Sorted Key Values:', len(self._sorted_key_values))
-        for i in range(len(self._sorted_key_values)):
-            print(len(self._sorted_key_values[i]))
-
-#-----------------------------------------------------------------------------------------------------------------------
-    def print_averaged_key(self):
-        print()
-        print('Sorted Keys')
-        print('----------')
-        print('Type:', type(self._scanned_keys_average))
-        print('Averaged Key Values:', len(self._scanned_keys_average))
-        print(self._scanned_keys_average)
+                        cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
+                if data == 'key' and self.save_image_overlay:
+                    self._scanned_keys.append(tuple(sorted(marks)))
+                    cv2.imwrite(('results/' + 'key_overlay_' + str(i) + '.jpeg'), result)
+                elif data == 'key':
+                    self._scanned_keys.append(tuple(sorted(marks)))
+                elif data == 'scantron' and self.save_image_overlay:
+                    self._scanned_values.append(tuple(sorted(marks)))
+                    cv2.imwrite(('results/' + 'scantron_overlay_' + str(i) + '.jpeg'), result)
+                elif data == 'scantron':
+                    self._scanned_values.append(tuple(sorted(marks)))
+            except Exception as ex:
+                print(ex)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def get_key_values(self) -> dict:
+        """
+        Method for getting the key values.
+        Returns:
+            dict: Averaged values for the location of all the bubble locations on the scantron sheet.
+        """
         return self._bubble_location
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def get_game_sheet_values(self) -> list:
+    def get_game_sheet_values(self) -> list[tuple]:
+        """
+        Method for getting the game sheet values.
+        Returns:
+            list[tuple]: List of tuples containing the values for each of the game sheets that was read into it.
+        """
         return self._scanned_values
