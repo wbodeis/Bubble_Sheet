@@ -315,6 +315,7 @@ class Scantron():
                     and key in self._team_number_location):
 
                         temp_team_number[self._team_number_location[key][1]] = self._team_number_location[key][0]
+                        count += 1
                         continue
             if count == 4:
                 break
