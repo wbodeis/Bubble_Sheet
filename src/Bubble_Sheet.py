@@ -77,7 +77,7 @@ class Bubble_Sheet():
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         print(self._df)
-        # self._save_file()
+        self._save_file()
 #-----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
         """
