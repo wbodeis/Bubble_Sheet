@@ -4,6 +4,9 @@
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
 
+# ======================================================================================================================
+# Standard Imports
+# ----------------------------------------------------------------------------------------------------------------------
 import os, cv2, numpy as np
 from pdf2image import convert_from_path
 
@@ -26,11 +29,11 @@ class OMR():
             cpu_threads (int): Total CPU threads found and passed to it for converting the pdf files.
             directories (list[str]): All of the folders where the data can be retrieved and saved. 
             image_format (str, optional): The file type being saved from the pdf conversion.
-                                          Defaults to 'jpeg'.
+                Defaults to 'jpeg'.
             save_image_overlay (bool, optional): While processing the images, it can save a 'dot' on each of the spots it finds mark to be saved in 'results/'. 
-                                                 Defaults to False.
-            mark_color (str, optional): You can use different colored pens or pencils for making the paper.
-                                        Defaults to 'blue'.
+                Defaults to False.
+            mark_color (str, optional): You can use different colored pens or pencils for making the paper. Called with lower() so it matches the method call.
+                Defaults to 'blue'.
 
         Raises:
             FileExistsError: If no keys were found in the folders. 
@@ -41,7 +44,7 @@ class OMR():
         self.cpu_threads: int = cpu_threads
         self.image_format: str = image_format
         self.save_image_overlay: bool = save_image_overlay
-        self.mark_color: str = mark_color
+        self.mark_color: str = mark_color.lower()
         self.directories: list[str] = directories
 
         # Created within and used by the class. 
@@ -238,7 +241,7 @@ class OMR():
             self._convert_pdf_to_image(0, 1, self._keys_pdf_names)
 
         if not self._scantron_pdf_names:
-            print('No game sheets were found to convert from a pdf.Looking for {} image format.'.format(self.image_format))
+            print('No game sheets were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
             self._convert_pdf_to_image(2, 3, self._scantron_pdf_names)
         
@@ -270,7 +273,9 @@ class OMR():
         self._get_key_average()
         self._update_scantron_bubbles()
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ======================================================================================================================
+# Low Level Private Functions
+# ----------------------------------------------------------------------------------------------------------------------
     def _get_key_pdf_names(self) -> None:
         """ Creating list of strings from the pdf files of keys. """
         self._keys_pdf_names = [i for i in os.listdir(self.directories[0]) if i.endswith('.pdf')]
@@ -321,9 +326,9 @@ class OMR():
         Taking each of the keys and sorting them by their column and Y (ascending) values. 
         OMR searches first by X then their Y pixel location so the order in the columns become mismatched. 
         For example, the second tuple should be first as far as we are concerned, but it's X value is higher and moved further down. 
-        (10, 5)
-        (11, 2)
-        _bubble_location has each of them split off into their respective chunks and then get sorted that way.
+            (10, 5)
+            (11, 2)
+            _bubble_location has each of them split off into their respective chunks and then get sorted that way.
         """
         temp_sorted_key_values: list = []
         for key in self._scanned_keys: # Looping through each key
@@ -388,20 +393,21 @@ class OMR():
                 if color == 'blue':
                     lower_range = np.array([110,50,50])
                     upper_range = np.array([130,255,255])
+                # Threshold for green.
+                elif color == 'green':
+                    lower_range = np.array([36, 25, 25])
+                    upper_range = np.array([70, 255,255])
+                # Threshold for red.
+                elif color == 'red':
+                    lower_range = np.array([155,25,0])
+                    upper_range = np.array([179,255,255])
+                # Threshold for yellow.
+                elif color == 'yellow':
+                    lower_range = np.array([20,100,100])
+                    upper_range = np.array([30,255,255])
                 else:
                     lower_range = np.array([110,50,50])
                     upper_range = np.array([130,255,255])
-                # Threshold for green.
-                # lower_range = np.array([36, 25, 25])
-                # upper_range = np.array([70, 255,255])
-
-                # Threshold for red.
-                # lower = np.array([155,25,0])
-                # upper = np.array([179,255,255])
-
-                # Threshold for yellow.
-                # lower = np.array([20,100,100])
-                # upper = np.array([30,255,255])
 
                 thresh = cv2.inRange(hsv, lower_range, upper_range)
 
@@ -414,14 +420,14 @@ class OMR():
 
                 # Apply morphology open.
                 kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                    ksize = (25,25))
+                                                   ksize = (25,25))
                 first_morph = cv2.morphologyEx(src = erode, 
-                                                kernel = kernel, 
-                                                op = cv2.MORPH_OPEN)
+                                               kernel = kernel, 
+                                               op = cv2.MORPH_OPEN)
 
                 # Apply morphology close.
                 kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                    ksize = (7,7))
+                                                   ksize = (7,7))
                 second_morph = cv2.morphologyEx(src = first_morph,
                                                 kernel = kernel, 
                                                 op = cv2.MORPH_CLOSE)
@@ -454,7 +460,9 @@ class OMR():
             except Exception as ex:
                 print(ex)
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ======================================================================================================================
+# Public Functions
+# ----------------------------------------------------------------------------------------------------------------------
     def get_key_values(self) -> dict:
         """
         Method for getting the key values.

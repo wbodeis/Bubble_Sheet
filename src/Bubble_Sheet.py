@@ -4,10 +4,14 @@
 # Author:  William Bodeis <wdbodeis@gmail.com>
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Stabdard imports.
+# ======================================================================================================================
+# Standard Imports
+# ----------------------------------------------------------------------------------------------------------------------
 import os, pandas as pd, re
 from datetime import datetime
-# Custom class imports.
+# ======================================================================================================================
+# Custom Class Imports
+# ----------------------------------------------------------------------------------------------------------------------
 from OMR import OMR
 from Scantron import Scantron
 
@@ -34,8 +38,8 @@ class Bubble_Sheet():
         self._directories: list[str] = []
         self._directory_check: bool = False
         self._OMR_data: OMR
-        self._bubble_location: dict
-        self._game_sheets: list
+        self._bubble_location: dict = {}
+        self._game_sheets: list = []
         self._processed_game_sheets: list[Scantron] = []
         self._game_sheet_data: list[dict] = []
         self._df: pd.DataFrame
@@ -48,7 +52,9 @@ class Bubble_Sheet():
             del self
             raise FileNotFoundError('One or more of the required directories was not found. They were created so please double check and rerun the program.')
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ======================================================================================================================
+# Public Functions
+# ----------------------------------------------------------------------------------------------------------------------
     def main(self):
         """
         For running all the data processing. It invokes all of the classes and methods to then save the data as a csv.
@@ -57,16 +63,23 @@ class Bubble_Sheet():
         """
         try:
             self._OMR_data = OMR(cpu_threads = self._cpu_threads,
-                                 directories = self._directories)
+                                 directories = self._directories,
+                                 image_format = 'jpeg',
+                                 save_image_overlay = False,
+                                 mark_color = 'blue')
         except Exception as ex:
+            print('An error occured:')
             print(ex)
+            return None
         
         try:
             self._bubble_location = self._OMR_data.get_key_values()
             self._game_sheets = self._OMR_data.get_game_sheet_values()
         except Exception as ex:
+            print('An error occured:')
             print(ex)
-            
+            return None
+        
         for sheet in self._game_sheets:
             self._processed_game_sheets.append(Scantron(scantron_data = sheet,
                                                         bubble_location = self._bubble_location, 
@@ -78,7 +91,9 @@ class Bubble_Sheet():
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         print(self._df)
         self._save_file()
-#-----------------------------------------------------------------------------------------------------------------------
+# ======================================================================================================================
+# Low Level Private Functions
+# ----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
         """
         List of the folder locations used for reading and writing the data.
