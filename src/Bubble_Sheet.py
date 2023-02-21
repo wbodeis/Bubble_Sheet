@@ -38,7 +38,7 @@ class Bubble_Sheet():
         self._game_sheets: list
         self._processed_game_sheets: list[Scantron] = []
         self._game_sheet_data: list[dict] = []
-        self._df: pd.DataFrame = pd.DataFrame
+        self._df: pd.DataFrame
 
         # Initializing methods.
         self._get_CPU_threads()
@@ -60,12 +60,13 @@ class Bubble_Sheet():
                                  directories = self._directories)
         except Exception as ex:
             print(ex)
+        
         try:
             self._bubble_location = self._OMR_data.get_key_values()
             self._game_sheets = self._OMR_data.get_game_sheet_values()
         except Exception as ex:
             print(ex)
-
+            
         for sheet in self._game_sheets:
             self._processed_game_sheets.append(Scantron(scantron_data = sheet,
                                                         bubble_location = self._bubble_location, 
@@ -76,7 +77,7 @@ class Bubble_Sheet():
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         print(self._df)
-        self._save_file()
+        # self._save_file()
 #-----------------------------------------------------------------------------------------------------------------------
     def _create_directories_list(self):
         """
