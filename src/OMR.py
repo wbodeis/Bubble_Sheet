@@ -9,6 +9,8 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import os, cv2, numpy as np
 from pdf2image import convert_from_path
+from concurrent.futures import ProcessPoolExecutor as PPE
+from itertools import repeat
 
 class OMR():
     """
@@ -256,19 +258,29 @@ class OMR():
             raise FileExistsError('No image for game sheets(s) to process were found.')
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
-        self._process_images(image_directory = 1, 
-                             image_names = self._key_names, 
-                             data = 'key',
-                             color = self.mark_color
-                             )
+        with PPE(max_workers = cpu_threads) as executor:
+            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat('blue'))
+        self._scanned_keys = tuple(executor_keys)
 
         # Getting the values from the game sheets. 
-        self._process_images(image_directory = 3,
-                             image_names = self._scantron_names,
-                             data = 'scantron',
-                             color = self.mark_color
-                             )
+        with PPE(max_workers = cpu_threads) as executor:
+            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat('blue'))
+        self._scanned_values = tuple(executor_scantron)
         
+
+        # TODO Delete once the multithreading is for sure good to go.        
+        # self._process_images(image_directory = 1, 
+        #                      image_names = self._key_names, 
+        #                      data = 'key',
+        #                      color = self.mark_color
+        #                      )
+
+        # self._process_images(image_directory = 3,
+        #                      image_names = self._scantron_names,
+        #                      data = 'scantron',
+        #                      color = self.mark_color
+        #                      )
+
         self._sort_key_values()
         self._get_key_average()
         self._update_scantron_bubbles()
@@ -459,6 +471,71 @@ class OMR():
                     self._scanned_values.append(tuple(sorted(marks)))
             except Exception as ex:
                 print(ex)
+#-----------------------------------------------------------------------------------------------------------------------
+    def _process_images_executor(self, image_directory: int, image_names: str, data: str, color: str) -> tuple:
+        """_summary_
+
+        Args:
+            image_directory (int): _description_
+            image_names (str): _description_
+            data (str): _description_
+            color (str): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            mark_location = []
+            omr_marks = []
+            img = cv2.imread(self.directories[image_directory] + image_names)
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+            # Threshold for blue.
+            if color == 'blue':
+                lower_range = np.array([110,50,50])
+                upper_range = np.array([130,255,255])
+
+            thresh = cv2.inRange(hsv, lower_range, upper_range)
+
+            # Apply erosion.
+            kernel = np.ones(shape = (5,5),
+                                dtype = np.uint8)
+            erode = cv2.erode(src = thresh,
+                                kernel = kernel,
+                                iterations = 1)
+
+            # Apply morphology open.
+            kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
+                                                ksize = (25,25))
+            first_morph = cv2.morphologyEx(src = erode, 
+                                            kernel = kernel, 
+                                            op = cv2.MORPH_OPEN)
+
+            # Apply morphology close.
+            kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
+                                                ksize = (7,7))
+            second_morph = cv2.morphologyEx(src = first_morph,
+                                            kernel = kernel, 
+                                            op = cv2.MORPH_CLOSE)
+
+            # Get contours
+            contours = cv2.findContours(image = second_morph,
+                                        mode = cv2.RETR_EXTERNAL,
+                                        method= cv2.CHAIN_APPROX_NONE)
+            contours = contours[0] if len(contours) == 2 else contours[1]
+            for contour in contours:
+                M = cv2.moments(contour)
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+                pt = (cx,cy)
+                omr_marks.append(pt)
+            if data == 'key':
+                mark_location.append(tuple(sorted(omr_marks)))
+            elif data == 'scantron':
+                mark_location.append(tuple(sorted(omr_marks)))
+        except Exception as ex:
+            print(ex)
+        return tuple(mark_location[0])  # Setting to index 0 otherwise the the return will come back as a tuple inside a tuple ((values),), where this is (values)
 
 # ======================================================================================================================
 # Public Functions
@@ -479,3 +556,6 @@ class OMR():
             list[tuple]: List of tuples containing the values for each of the game sheets that was read into it.
         """
         return self._scanned_values
+
+if __name__ == "__main__":
+    OMR()
