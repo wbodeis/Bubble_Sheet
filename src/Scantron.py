@@ -471,10 +471,11 @@ class Scantron():
             dict: Data that was collected and collated for each game sheet. 
                   Each key should correlate directly the column in the raw data section of the gooogle sheet. 
         """
-        temp_raw_data: dict = {}
-        for key, values in self._raw_data.items():
-            try:
-                temp_raw_data[key] = values[1]
-            except Exception as ex:
-                print(ex)
-        return temp_raw_data
+        # temp_raw_data: dict = {}
+        # for key, values in self._raw_data.items():
+        #     try:
+        #         temp_raw_data[key] = values[1]
+        #     except Exception as ex:
+        #         print(ex)
+        # return temp_raw_data
+        return {k: v[1] for k,v in self._raw_data.items()}

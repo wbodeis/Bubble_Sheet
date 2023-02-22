@@ -259,27 +259,13 @@ class OMR():
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         with PPE(max_workers = cpu_threads) as executor:
-            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat('blue'))
+            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat('blue'), repeat(self.save_image_overlay))
         self._scanned_keys = tuple(executor_keys)
 
         # Getting the values from the game sheets. 
         with PPE(max_workers = cpu_threads) as executor:
-            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat('blue'))
+            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat('blue'), repeat(self.save_image_overlay))
         self._scanned_values = tuple(executor_scantron)
-        
-
-        # TODO Delete once the multithreading is for sure good to go.        
-        # self._process_images(image_directory = 1, 
-        #                      image_names = self._key_names, 
-        #                      data = 'key',
-        #                      color = self.mark_color
-        #                      )
-
-        # self._process_images(image_directory = 3,
-        #                      image_names = self._scantron_names,
-        #                      data = 'scantron',
-        #                      color = self.mark_color
-        #                      )
 
         self._sort_key_values()
         self._get_key_average()
@@ -385,113 +371,43 @@ class OMR():
             self._bubble_location[key][0] = self._scanned_keys_average[key]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _process_images(self, image_directory: int, image_names: list[str], data: str, color: str) -> None:
-        """_summary_
+    def _process_images_executor(self, image_directory: int, image_name: str, data: str, color: str, save_image_overlay: bool) -> tuple:
+        """
+        Method for gathering all of the spots where the paper is marked. 
+        Changed over to work with multithreading to help speed up the processing time. 
+
 
         Args:
             image_directory (int): Index for the list of folder names.
             image_names (list[str]): Names of the files to be read in and marked locations saved. 
             data (str): Where the image is a key or game sheet.
             color (str): The color range that the opencv tries to match.
-        TODO Get the correct HSV color for the other colors and verify what was found for greem, red, and yellow.
-        """
-        for i in range(len(image_names)):
-            try:
-                marks = []
-                img = cv2.imread(self.directories[image_directory] + image_names[i])
-                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-                # Threshold for blue.
-                if color == 'blue':
-                    lower_range = np.array([110,50,50])
-                    upper_range = np.array([130,255,255])
-                # Threshold for green.
-                elif color == 'green':
-                    lower_range = np.array([36, 25, 25])
-                    upper_range = np.array([70, 255,255])
-                # Threshold for red.
-                elif color == 'red':
-                    lower_range = np.array([155,25,0])
-                    upper_range = np.array([179,255,255])
-                # Threshold for yellow.
-                elif color == 'yellow':
-                    lower_range = np.array([20,100,100])
-                    upper_range = np.array([30,255,255])
-                else:
-                    lower_range = np.array([110,50,50])
-                    upper_range = np.array([130,255,255])
-
-                thresh = cv2.inRange(hsv, lower_range, upper_range)
-
-                # Apply erosion.
-                kernel = np.ones(shape = (5,5),
-                                    dtype = np.uint8)
-                erode = cv2.erode(src = thresh,
-                                    kernel = kernel,
-                                    iterations = 1)
-
-                # Apply morphology open.
-                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                   ksize = (25,25))
-                first_morph = cv2.morphologyEx(src = erode, 
-                                               kernel = kernel, 
-                                               op = cv2.MORPH_OPEN)
-
-                # Apply morphology close.
-                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                   ksize = (7,7))
-                second_morph = cv2.morphologyEx(src = first_morph,
-                                                kernel = kernel, 
-                                                op = cv2.MORPH_CLOSE)
-
-                # Get contours
-                contours = cv2.findContours(image = second_morph,
-                                            mode = cv2.RETR_EXTERNAL,
-                                            method= cv2.CHAIN_APPROX_NONE)
-                contours = contours[0] if len(contours) == 2 else contours[1]
-                if self.save_image_overlay:
-                    result = img.copy() 
-                for contour in contours:
-                    M = cv2.moments(contour)
-                    cx = int(M["m10"] / M["m00"])
-                    cy = int(M["m01"] / M["m00"])
-                    pt = (cx,cy)
-                    marks.append(pt)
-                    if self.save_image_overlay:
-                        cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
-                if data == 'key' and self.save_image_overlay:
-                    self._scanned_keys.append(tuple(sorted(marks)))
-                    cv2.imwrite(('results/' + 'key_overlay_' + str(i) + '.jpeg'), result)
-                elif data == 'key':
-                    self._scanned_keys.append(tuple(sorted(marks)))
-                elif data == 'scantron' and self.save_image_overlay:
-                    self._scanned_values.append(tuple(sorted(marks)))
-                    cv2.imwrite(('results/' + 'scantron_overlay_' + str(i) + '.jpeg'), result)
-                elif data == 'scantron':
-                    self._scanned_values.append(tuple(sorted(marks)))
-            except Exception as ex:
-                print(ex)
-#-----------------------------------------------------------------------------------------------------------------------
-    def _process_images_executor(self, image_directory: int, image_names: str, data: str, color: str) -> tuple:
-        """_summary_
-
-        Args:
-            image_directory (int): _description_
-            image_names (str): _description_
-            data (str): _description_
-            color (str): _description_
 
         Returns:
-            _type_: _description_
+            tuple: Tuple of tuples that contain the X and Y coordinates of every mark that was detected on the sheet.
         """
         try:
-            mark_location = []
             omr_marks = []
-            img = cv2.imread(self.directories[image_directory] + image_names)
+            img = cv2.imread(self.directories[image_directory] + image_name)
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
             # Threshold for blue.
             if color == 'blue':
+                lower_range = np.array([110,50,50])
+                upper_range = np.array([130,255,255])
+            # Threshold for green.
+            # elif color == 'green':
+            #     lower_range = np.array([36, 25, 25])
+            #     upper_range = np.array([70, 255,255])
+            # # Threshold for red.
+            # elif color == 'red':
+            #     lower_range = np.array([155,25,0])
+            #     upper_range = np.array([179,255,255])
+            # # Threshold for yellow.
+            # elif color == 'yellow':
+            #     lower_range = np.array([20,100,100])
+            #     upper_range = np.array([30,255,255])
+            else:
                 lower_range = np.array([110,50,50])
                 upper_range = np.array([130,255,255])
 
@@ -499,21 +415,21 @@ class OMR():
 
             # Apply erosion.
             kernel = np.ones(shape = (5,5),
-                                dtype = np.uint8)
+                             dtype = np.uint8)
             erode = cv2.erode(src = thresh,
-                                kernel = kernel,
-                                iterations = 1)
+                              kernel = kernel,
+                              iterations = 1)
 
             # Apply morphology open.
             kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
-                                                ksize = (25,25))
+                                               ksize = (25,25))
             first_morph = cv2.morphologyEx(src = erode, 
-                                            kernel = kernel, 
-                                            op = cv2.MORPH_OPEN)
+                                           kernel = kernel, 
+                                           op = cv2.MORPH_OPEN)
 
             # Apply morphology close.
             kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
-                                                ksize = (7,7))
+                                               ksize = (7,7))
             second_morph = cv2.morphologyEx(src = first_morph,
                                             kernel = kernel, 
                                             op = cv2.MORPH_CLOSE)
@@ -523,19 +439,30 @@ class OMR():
                                         mode = cv2.RETR_EXTERNAL,
                                         method= cv2.CHAIN_APPROX_NONE)
             contours = contours[0] if len(contours) == 2 else contours[1]
+            if save_image_overlay:
+                result = img.copy() 
             for contour in contours:
                 M = cv2.moments(contour)
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
                 pt = (cx,cy)
                 omr_marks.append(pt)
-            if data == 'key':
-                mark_location.append(tuple(sorted(omr_marks)))
+                if self.save_image_overlay:
+                    cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
+            if data == 'key' and save_image_overlay:
+                omr_marks = tuple(sorted(omr_marks))
+                cv2.imwrite(('results/' + 'key_overlay_' + image_name + '.jpeg'), result)
+            elif data == 'key':
+                omr_marks = tuple(sorted(omr_marks))
+            elif data == 'scantron' and self.save_image_overlay:
+                omr_marks = tuple(sorted(omr_marks))
+                cv2.imwrite(('results/' + 'scantron_overlay_' + image_name + '.jpeg'), result)
             elif data == 'scantron':
-                mark_location.append(tuple(sorted(omr_marks)))
+                omr_marks = tuple(sorted(omr_marks))
         except Exception as ex:
+            print('A problem occured with,' + image_name)
             print(ex)
-        return tuple(mark_location[0])  # Setting to index 0 otherwise the the return will come back as a tuple inside a tuple ((values),), where this is (values)
+        return omr_marks
 
 # ======================================================================================================================
 # Public Functions

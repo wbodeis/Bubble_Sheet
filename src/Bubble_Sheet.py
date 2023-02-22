@@ -84,14 +84,13 @@ class Bubble_Sheet():
         for sheet in self._game_sheets:
             self._processed_game_sheets.append(Scantron(scantron_data = sheet,
                                                         bubble_location = self._bubble_location, 
-                                                        pixel_differential = self.pixel_differential)
-            )
+                                                        pixel_differential = self.pixel_differential))
         for sheet in self._processed_game_sheets:
             self._game_sheet_data.append(sheet._get_raw_data())
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
-        # print(self._df)
-        self._save_file()
+        print(self._df)
+        # self._save_file()
 # ======================================================================================================================
 # Low Level Private Functions
 # ----------------------------------------------------------------------------------------------------------------------
