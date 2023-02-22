@@ -7,14 +7,15 @@
 # ======================================================================================================================
 # Standard Imports
 # ----------------------------------------------------------------------------------------------------------------------
-import os, pandas as pd, re
+import os, pandas as pd, re, sys, multiprocessing
 from datetime import datetime
+
 # ======================================================================================================================
 # Custom Class Imports
 # ----------------------------------------------------------------------------------------------------------------------
 from OMR import OMR
 from Scantron import Scantron
-import time
+
 class Bubble_Sheet():
     """
     Highest level class for running and acquiring the game data. 
@@ -61,7 +62,6 @@ class Bubble_Sheet():
         TODO Figure out the processing pool to multithread the processing. 
         TODO Nest try-excepts? They're all needed one after another, or maybe seperat method calls?
         """
-        start = time.time()
         try:
             self._OMR_data = OMR(cpu_threads = self._cpu_threads,
                                  directories = self._directories,
@@ -90,8 +90,6 @@ class Bubble_Sheet():
             self._game_sheet_data.append(sheet._get_raw_data())
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
-        end =  time.time()
-        print(end - start)
         # print(self._df)
         self._save_file()
 # ======================================================================================================================
@@ -136,4 +134,7 @@ class Bubble_Sheet():
                         index = False)
 #-----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
+    if sys.platform.startswith('win'):
+        # On Windows calling this function is necessary.
+        multiprocessing.freeze_support()
     Bubble_Sheet().main()
