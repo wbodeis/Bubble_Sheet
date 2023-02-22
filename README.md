@@ -79,15 +79,20 @@ A shortcut is to beging typing its name, like bubb, then hit tab and it will aut
 .\Bubble_Sheet_Portable_0.3.1.exe
 
 key/
-- save the pdf key files here
+- save the pdf key files here  
+
 key_images/
-- save the image key files here
+- save the image key files here  
+
 scantron/
-- save the pdf game sheet files here
+- save the pdf game sheet files here  
+
 scantron_images/
-- save the image game sheet files here
+- save the image game sheet files here  
+
 results/
-- .csv after gathering the data is saved here
+- .csv after gathering the data is saved here  
+
 poppler/
 - required for converting pdf files into .jpeg or whatever your chosen image format may be.
 - version 23.01.0 is what was included in the folder
