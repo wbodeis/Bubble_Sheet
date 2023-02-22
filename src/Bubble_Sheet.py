@@ -89,8 +89,8 @@ class Bubble_Sheet():
             self._game_sheet_data.append(sheet._get_raw_data())
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
-        print(self._df)
-        # self._save_file()
+        # print(self._df)
+        self._save_file()
 # ======================================================================================================================
 # Low Level Private Functions
 # ----------------------------------------------------------------------------------------------------------------------

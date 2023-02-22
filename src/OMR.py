@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import os, cv2, numpy as np
 from pdf2image import convert_from_path
-from concurrent.futures import ProcessPoolExecutor as PPE
+from concurrent.futures import ProcessPoolExecutor as ppe
 from itertools import repeat
 
 class OMR():
@@ -258,12 +258,12 @@ class OMR():
             raise FileExistsError('No image for game sheets(s) to process were found.')
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
-        with PPE(max_workers = cpu_threads) as executor:
+        with ppe(max_workers = cpu_threads) as executor:
             executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat('blue'), repeat(self.save_image_overlay))
         self._scanned_keys = tuple(executor_keys)
 
         # Getting the values from the game sheets. 
-        with PPE(max_workers = cpu_threads) as executor:
+        with ppe(max_workers = cpu_threads) as executor:
             executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat('blue'), repeat(self.save_image_overlay))
         self._scanned_values = tuple(executor_scantron)
 

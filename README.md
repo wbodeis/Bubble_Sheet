@@ -2,7 +2,7 @@
 Project: OMR Scantron for FRC Team 5712  
 Author: William Bodeis <wdbodeis@gmail.com>  
 
-This is to be used with the pdf included in this project specific to the FIRST 2023 season "Charged Up."  
+This is to be used with the pdf included in this project (Game_Sheet.pdf) specific to the FIRST 2023 season "Charged Up."  
 The folders are needed and the program will first check for those. If they are not there, it will create them before exiting to be sure all the files are in the correct folders.  
 It will also close if there aren't any keys or game sheets to be read in and used, since there is no point in running the program without either available.  
 
@@ -61,4 +61,33 @@ upper_range = np.array([130,255,255])
 Class for creating an object of each game sheet scanned.  
 The various methods were broken out in attempt to make it more readable, while it could have just been one large one with a bunch of nested if statements.  
 Everything is determined against the pixel location of the averaged key value(s) that are gathered so the X and Y values fit with the given range of pixel_differential value.  
-Everything is stored in the object and returned using _get_raw_data().  
+Everything is stored in the object and returned using _get_raw_data(). 
+
+
+## Running the executable. 
+
+It is recommended to use powershell to run the script so you can see the readout if there are any errors that occur.
+You can run it by clicking it as you norammlly would, but the console closes as soon as it gets done running.
+
+Change the directory to where you have this folder located. The example below is for testing it on my own computer.
+
+cd C:\Users\Administrator\Desktop\Bubble_Sheet_Portable
+
+Then the name of the exe to run it. You need the beginning '.\' for it to run properly.
+A shortcut is to beging typing its name, like bubb, then hit tab and it will autofill the rest for you. 
+
+.\Bubble_Sheet_Portable_0.3.1.exe
+
+key/
+- save the pdf key files here
+key_images/
+- save the image key files here
+scantron/
+- save the pdf game sheet files here
+scantron_images/
+- save the image game sheet files here
+results/
+- .csv after gathering the data is saved here
+poppler/
+- required for converting pdf files into .jpeg or whatever your chosen image format may be.
+- version 23.01.0 is what was included in the folder
