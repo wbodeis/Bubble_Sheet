@@ -73,7 +73,7 @@ Change the directory to where you have this folder located. The example below is
 
 cd C:\Users\Administrator\Desktop\Bubble_Sheet_Portable
 
-Then the name of the exe to run it. You need the beginning '.\' for it to run properly.
+Then the name of the exe to run it. You need the beginning '.\\' for it to run properly.
 A shortcut is to beging typing its name, like bubb, then hit tab and it will autofill the rest for you. 
 
 .\Bubble_Sheet_Portable_0.3.1.exe
