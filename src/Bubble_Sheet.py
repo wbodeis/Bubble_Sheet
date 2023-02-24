@@ -126,9 +126,9 @@ class Bubble_Sheet():
 #-----------------------------------------------------------------------------------------------------------------------
     def _save_file(self):
         """ Saving the data as a csv with a the current time as it's name so nothing saves over previous datasets. """
-        time_now = datetime.now()
-        file_name = re.sub('-|:|\.|\s', '_', str(time_now)) + '.csv'
-        path = 'results/' + file_name
+        time_now: datetime = datetime.now()
+        file_name: str = re.sub('-|:|\.|\s', '_', str(time_now)) + '.csv'
+        path: str = 'results/' + file_name
         self._df.to_csv(path_or_buf = path,
                         index = False)
 #-----------------------------------------------------------------------------------------------------------------------
