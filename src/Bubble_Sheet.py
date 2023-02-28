@@ -91,6 +91,7 @@ class Bubble_Sheet():
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         # print(self._df)
         self._save_file()
+
 # ======================================================================================================================
 # Low Level Private Functions
 # ----------------------------------------------------------------------------------------------------------------------
@@ -115,6 +116,7 @@ class Bubble_Sheet():
             if not os.path.exists(directory):
                 self._directory_check = True
                 os.makedirs(directory)
+
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_CPU_threads(self):
         """ CPU Threads available on the current system. """
@@ -131,7 +133,10 @@ class Bubble_Sheet():
         path = 'results/' + file_name
         self._df.to_csv(path_or_buf = path,
                         index = False)
-#-----------------------------------------------------------------------------------------------------------------------
+
+# ======================================================================================================================
+# Main
+# ----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
