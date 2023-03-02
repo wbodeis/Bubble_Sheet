@@ -16,13 +16,13 @@ class OMR():
     """
     Optical Mark Recognition (OMR)
     The class is used in doing the heavy lifting for manipulating and collating the data.  
-    It will convert pdf files to whatever file format you send, while defaulting to jpeg.  
+    It will convert pdf files to whatever file format you send, while defaulting to jpg.  
     It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
     """
     def __init__(self,
                  cpu_threads: int,
                  directories: list[str],
-                 image_format: str = 'jpeg',
+                 image_format: str = 'jpg',
                  save_image_overlay: bool = False,
                  mark_color: str = 'blue') -> None:
         """_summary_
@@ -31,7 +31,7 @@ class OMR():
             cpu_threads (int): Total CPU threads found and passed to it for converting the pdf files.
             directories (list[str]): All of the folders where the data can be retrieved and saved. 
             image_format (str, optional): The file type being saved from the pdf conversion.
-                Defaults to 'jpeg'.
+                Defaults to 'jpg'.
             save_image_overlay (bool, optional): While processing the images, it can save a 'dot' on each of the spots it finds mark to be saved in 'results/'. 
                 Defaults to False.
             mark_color (str, optional): You can use different colored pens or pencils for making the paper. Called with lower() so it matches the method call.
@@ -314,9 +314,9 @@ class OMR():
                         images[j].save(fp = location,
                                        bitmap_format = self.image_format)
                     except:
-                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpeg'
+                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpg'
                         images[j].save(fp = location,
-                                       bitmap_format = 'jpeg')
+                                       bitmap_format = 'jpg')
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self) -> None:
@@ -451,12 +451,12 @@ class OMR():
                     cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
             if data == 'key' and save_image_overlay:
                 omr_marks = tuple(sorted(omr_marks))
-                cv2.imwrite(('results/' + 'key_overlay_' + image_name + '.jpeg'), result)
+                cv2.imwrite(('results/' + 'key_overlay_' + image_name + '.jpg'), result)
             elif data == 'key':
                 omr_marks = tuple(sorted(omr_marks))
             elif data == 'scantron' and self.save_image_overlay:
                 omr_marks = tuple(sorted(omr_marks))
-                cv2.imwrite(('results/' + 'scantron_overlay_' + image_name + '.jpeg'), result)
+                cv2.imwrite(('results/' + 'scantron_overlay_' + image_name + '.jpg'), result)
             elif data == 'scantron':
                 omr_marks = tuple(sorted(omr_marks))
         except Exception as ex:

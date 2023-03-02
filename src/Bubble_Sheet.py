@@ -65,7 +65,7 @@ class Bubble_Sheet():
         try:
             self._OMR_data = OMR(cpu_threads = self._cpu_threads,
                                  directories = self._directories,
-                                 image_format = 'jpeg',
+                                 image_format = 'jpg',
                                  save_image_overlay = False,
                                  mark_color = 'blue')
         except Exception as ex:
@@ -91,6 +91,7 @@ class Bubble_Sheet():
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         # print(self._df)
         self._save_file()
+        print(self._bubble_location)
 
 # ======================================================================================================================
 # Low Level Private Functions
