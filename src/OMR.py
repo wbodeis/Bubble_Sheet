@@ -259,12 +259,12 @@ class OMR():
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         with ppe(max_workers = cpu_threads) as executor:
-            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat('blue'), repeat(self.save_image_overlay))
+            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat(self.mark_color), repeat(self.save_image_overlay))
         self._scanned_keys = tuple(executor_keys)
 
         # Getting the values from the game sheets. 
         with ppe(max_workers = cpu_threads) as executor:
-            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat('blue'), repeat(self.save_image_overlay))
+            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat(self.mark_color), repeat(self.save_image_overlay))
         self._scanned_values = tuple(executor_scantron)
 
         self._sort_key_values()
