@@ -185,7 +185,81 @@ class Scantron():
                                          8: [0],
                                          9: [1],
                                          }
-        self._game_results_locations: dict = {
+        self._game_red_results_locations: dict = {
+                                              0: 'Auton HP TL',
+                                              1: 'Auton HP ML',
+                                              2: 'Auton HP LLCone',
+                                              3: 'Auton HP LLCube',
+                                              4: 'Tele HP TL',
+                                              5: 'Tele HP ML',
+                                              6: 'Tele HP LLCone',
+                                              7: 'Tele HP LLCube',
+                                              10: 'Auton HP TM',
+                                              11: 'Auton HP MM',
+                                              12: 'Auton HP MLCone',
+                                              13: 'Auton HP MLCube',
+                                              14: 'Tele HP TM',
+                                              15: 'Tele HP MM',
+                                              16: 'Tele HP MLCone',
+                                              17: 'Tele HP MLCube',
+                                              18: 'Auton HP TR',
+                                              19: 'Auton HP MR',
+                                              20: 'Auton HP LRCone',
+                                              21: 'Auton HP LRCube',
+                                              22: 'Tele HP TR',
+                                              23: 'Tele HP MR',
+                                              24: 'Tele HP LRCone',
+                                              25: 'Tele HP LRCube',
+                                              31: 'Auton M TL',
+                                              32: 'Auton M ML',
+                                              33: 'Auton M LLCone',
+                                              34: 'Auton M LLCube',
+                                              35: 'Tele M TL',
+                                              36: 'Tele M ML',
+                                              37: 'Tele M LLCone',
+                                              38: 'Tele M LLCube',
+                                              45: 'Auton M TM',
+                                              46: 'Auton M MM',
+                                              47: 'Auton M MLCone',
+                                              48: 'Auton M MLCube',
+                                              50: 'Tele M TM',
+                                              51: 'Tele M MM',
+                                              52: 'Tele M MLCone',
+                                              53: 'Tele M MLCube',
+                                              66: 'Auton M TR',
+                                              67: 'Auton M MR',
+                                              68: 'Auton M LRCone',
+                                              69: 'Auton M LRCube',
+                                              70: 'Tele M TR',
+                                              71: 'Tele M MR',
+                                              72: 'Tele M LRCone',
+                                              73: 'Tele M LRCube',
+                                              86: 'Auton ST TL',
+                                              87: 'Auton ST ML',
+                                              88: 'Auton ST LLCone',
+                                              89: 'Auton ST LLCube',
+                                              90: 'Tele ST TL',
+                                              91: 'Tele ST ML',
+                                              92: 'Tele ST LLCone',
+                                              93: 'Tele ST LLCube',
+                                              100: 'Auton ST TM',
+                                              101: 'Auton ST MM',
+                                              102: 'Auton ST MLCone',
+                                              103: 'Auton ST MLCube',
+                                              105: 'Tele ST TM',
+                                              106: 'Tele ST MM',
+                                              107: 'Tele ST MLCone',
+                                              108: 'Tele ST MLCube',
+                                              116: 'Auton ST TR',
+                                              117: 'Auton ST MR',
+                                              118: 'Auton ST LRCone',
+                                              119: 'Auton ST LRCube',
+                                              120: 'Tele ST TR',
+                                              121: 'Tele ST MR',
+                                              122: 'Tele ST LRCone',
+                                              123: 'Tele ST LRCube'
+                                              }
+        self._game_blue_results_locations: dict = {
                                               0: 'Auton HP TL',
                                               1: 'Auton HP ML',
                                               2: 'Auton HP LLCone',
@@ -396,12 +470,14 @@ class Scantron():
                 temp_key_x = value[0][0]
                 temp_key_y = value[0][1]
 
-                if ((temp_key_x <= temp_x_upper  
-                     and  temp_key_x >= temp_x_lower
-                     and temp_key_y <= temp_y_upper
-                     and temp_key_y >= temp_y_lower)
-                     and key in self._game_results_locations):
-                        self._raw_data[self._game_results_locations[key]][1] = 1
+                if (temp_key_x <= temp_x_upper  
+                    and temp_key_x >= temp_x_lower
+                    and temp_key_y <= temp_y_upper
+                    and temp_key_y >= temp_y_lower):
+                    if (self._raw_data['Alliance'][1] == 0) and (key in self._game_blue_results_locations): # Blue alliance 
+                        self._raw_data[self._game_blue_results_locations[key]][1] = 1
+                    elif (self._raw_data['Alliance'][1] == 1) and (key in self._game_red_results_locations): # Red alliance 
+                        self._raw_data[self._game_red_results_locations[key]][1] = 1
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_play_style(self) -> None:
