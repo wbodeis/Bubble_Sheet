@@ -451,12 +451,12 @@ class OMR():
                     cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
             if data == 'key' and save_image_overlay:
                 omr_marks = tuple(sorted(omr_marks))
-                cv2.imwrite(('results/' + 'key_overlay_' + image_name + '.jpg'), result)
+                cv2.imwrite(('results/' + 'key_overlay_' + image_name), result)
             elif data == 'key':
                 omr_marks = tuple(sorted(omr_marks))
             elif data == 'scantron' and self.save_image_overlay:
                 omr_marks = tuple(sorted(omr_marks))
-                cv2.imwrite(('results/' + 'scantron_overlay_' + image_name + '.jpg'), result)
+                cv2.imwrite(('results/' + 'scantron_overlay_' + image_name), result)
             elif data == 'scantron':
                 omr_marks = tuple(sorted(omr_marks))
         except Exception as ex:
