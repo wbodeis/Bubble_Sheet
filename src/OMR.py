@@ -443,8 +443,11 @@ class OMR():
                 result = img.copy() 
             for contour in contours:
                 M = cv2.moments(contour)
-                cx = int(M["m10"] / M["m00"])
-                cy = int(M["m01"] / M["m00"])
+                if M["m00"] != 0:
+                    cx = int(M["m10"] / M["m00"])
+                    cy = int(M["m01"] / M["m00"])
+                else:
+                    continue
                 pt = (cx,cy)
                 omr_marks.append(pt)
                 if self.save_image_overlay:
@@ -460,7 +463,7 @@ class OMR():
             elif data == 'scantron':
                 omr_marks = tuple(sorted(omr_marks))
         except Exception as ex:
-            print('A problem occured with,' + image_name)
+            print('A problem occured with, ' + image_name)
             print(ex)
         return omr_marks
 
