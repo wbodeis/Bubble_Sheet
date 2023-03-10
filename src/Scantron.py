@@ -416,7 +416,7 @@ class Scantron():
                 temp_key_y = value[0][1]
 
                 if ((temp_key_x <= temp_x_upper  
-                     and  temp_key_x >= temp_x_lower
+                     and temp_key_x >= temp_x_lower
                      and temp_key_y <= temp_y_upper
                      and temp_key_y >= temp_y_lower)
                      and key in self._match_number_location):
@@ -442,7 +442,7 @@ class Scantron():
                 temp_key_y = value[0][1]
 
                 if ((temp_key_x <= temp_x_upper  
-                     and  temp_key_x >= temp_x_lower
+                     and temp_key_x >= temp_x_lower
                      and temp_key_y <= temp_y_upper
                      and temp_key_y >= temp_y_lower)
                      and key in self._alliance_location):
@@ -497,7 +497,7 @@ class Scantron():
                 temp_key_y = value[0][1]
 
                 if ((temp_key_x <= temp_x_upper  
-                     and  temp_key_x >= temp_x_lower
+                     and temp_key_x >= temp_x_lower
                      and temp_key_y <= temp_y_upper
                      and temp_key_y >= temp_y_lower)
                      and key in self._play_style_location):
