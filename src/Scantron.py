@@ -6,9 +6,9 @@
 
 class Scantron():
     """
-    Class for creating an object of each game sheet scanned.
-    The various methods were broken out in attempt to make it more readable, while it could have just been one large one with a bunch of nested if statements.
-    Everything is determined against the pixel location of the averaged key value(s) that are gathered so the X and Y values fit with the given range of pixel_differential value. 
+    Class for creating an object of each game sheet scanned. \n
+    The various methods were broken out in attempt to make it more readable, while it could have just been one large one with a bunch of nested if statements. \n
+    Everything is determined against the pixel location of the averaged key value(s) that are gathered so the X and Y values fit with the given range of pixel_differential value. \n
     Everything is stored in the object and returned using _get_raw_data().
     """
     def __init__(self,
@@ -157,7 +157,7 @@ class Scantron():
                                             144: [9, 0],
                                             145: [9, 1],
                                             146: [9, 2],
-                                            147: [9, 3],
+                                            147: [9, 3]
                                             }
         self._match_number_location: dict = {
                                              39: [0, 0],
@@ -179,11 +179,11 @@ class Scantron():
                                              136: [8, 0],
                                              137: [8, 1],
                                              142: [9, 0],
-                                             143: [9, 1],
+                                             143: [9, 1]
                                              }
         self._alliance_location: dict = {
                                          8: [0],
-                                         9: [1],
+                                         9: [1]
                                          }
         self._game_red_results_locations: dict = {
                                               0: 'Auton HP TL',
@@ -369,7 +369,7 @@ class Scantron():
 # ----------------------------------------------------------------------------------------------------------------------
     def _determine_team_number(self) -> None:
         """ 
-        Determinging the team's number. 
+        Determinging the team's number. \n
         Defaults to 0000 if nothing was entered or detected. 
         """
         temp_team_number: list = [0,0,0,0]
@@ -400,7 +400,7 @@ class Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_match_numbner(self) -> None:
         """ 
-        Determinging the match the team played in. 
+        Determinging the match the team played in. \n
         Defaults to 00 if nothing was entered or detected. 
         """
         temp_match_number: list = [0,0]
@@ -482,8 +482,8 @@ class Scantron():
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_play_style(self) -> None:
         """
-        For the last of the sundried pertaining to the game itself. 
-        Set as a bunch of ifs to make sure it works. 
+        For the last of the sundried pertaining to the game itself. \n
+        Set as a bunch of ifs to make sure it works. \n
         TODO Change later once it is known to be working correctly. 
         """
         for i in range(len(self.scantron_data)):

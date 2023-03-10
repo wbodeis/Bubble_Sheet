@@ -14,10 +14,10 @@ from itertools import repeat
 
 class OMR():
     """
-    Optical Mark Recognition (OMR)
-    The class is used in doing the heavy lifting for manipulating and collating the data.  
-    It will convert pdf files to whatever file format you send, while defaulting to jpg.  
-    It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
+    Optical Mark Recognition (OMR) \n
+    The class is used in doing the heavy lifting for manipulating and collating the data. \n  
+    It will convert pdf files to whatever file format you send, while defaulting to jpg. \n
+    It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles. \n
     """
     def __init__(self,
                  cpu_threads: int,
@@ -237,6 +237,7 @@ class OMR():
         # Checking for and converting pdf files if those are used instead of pictures.
         self._get_key_pdf_names()
         self._get_scantron_pdf_names()
+        
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
@@ -268,6 +269,9 @@ class OMR():
         self._scanned_values = tuple(executor_scantron)
 
         self._sort_key_values()
+        if not self._sorted_key_values:
+            del self
+            raise IndexError('No keys of appropriate length were found.')
         self._get_key_average()
         self._update_scantron_bubbles()
 
@@ -296,19 +300,19 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_image(self, pdf_directory: int, image_directory: int, pdf_names: list[str]) -> None:
         """
-        Taking the various pdf files and converting them to an image of the specified file type from the class initi. 
+        Taking the various pdf files and converting them to an image of the specified file type from the class init. \n
         Args:
             pdf_directory (int): Index for the list of folder names.
             image_directory (int): Index for the list of folder names.
             pdf_names (list[str]): Names of the files to be converted from pdf. 
         """
-        for i in range(len(pdf_names)):
+        for i in range(len(pdf_names)):  # Each pdf
                 images = convert_from_path(pdf_path = self.directories[pdf_directory] + pdf_names[i],
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
                                            thread_count = self.cpu_threads)
 
-                for j in range(len(images)):
+                for j in range(len(images)):  # Each page of the pdf
                     try:
                         location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_format
                         images[j].save(fp = location,
@@ -321,39 +325,40 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def _sort_key_values(self) -> None:
         """
-        Taking each of the keys and sorting them by their column and Y (ascending) values. 
-        OMR searches first by X then their Y pixel location so the order in the columns become mismatched. 
-        For example, the second tuple should be first as far as we are concerned, but it's X value is higher and moved further down. 
-            (10, 5)
-            (11, 2)
-            _bubble_location has each of them split off into their respective chunks and then get sorted that way.
+        Taking each of the keys and sorting them by their column and Y (ascending) values. \n
+        OMR searches first by X then their Y pixel location so the order in the columns become mismatched. \n
+        For example, the second tuple should be first as far as we are concerned, but it's X value is higher and moved further down. \n
+            (10, 5) \n
+            (11, 2) \n
+        _bubble_location has each of them split off into their respective chunks and then get sorted that way.
         """
         temp_sorted_key_values: list = []
-        for key in self._scanned_keys: # Looping through each key
+        for key in self._scanned_keys:  # Looping through each key.
+            if len(key) != self._total_key_values:  # Making sure the key is the correct length. 
+                continue
             temp_key_sorted = []
-            for i in range(len(self._key_column_index)): # Sorting out each 'column'
+            for i in range(len(self._key_column_index)):  # Sorting out each 'column.'
                 if i == (len(self._key_column_index) - 1):
                     temp_column = key[self._key_column_index[i]: (self._total_key_values + 1)]
                 else:
                     temp_column = key[self._key_column_index[i]: self._key_column_index[i+1]]
-                temp_key_sorted += sorted(temp_column, key = lambda x: x[1]) # Sorting the column.
-            temp_sorted_key_values.append(temp_key_sorted) # Adding the list of each key to the mega list.
+                temp_key_sorted += sorted(temp_column, key = lambda x: x[1])  # Sorting the column.
+            temp_sorted_key_values.append(temp_key_sorted)  # Adding the list of each key to the mega list.
         self._sorted_key_values = temp_sorted_key_values
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _get_key_average(self) -> None:
         """
-        Taking all of the keys that were found and averaging their values together.
+        Taking all of the keys that were found and averaging their values together. \n
         Since they are going to be printed off and scanned, it will give a more realistic value versus creating it from filling in the blanks on a saved image. 
-        TODO Try-except (if-else?) for if the keys don't have the total (155) marks/indicated values.
         """
         temp_key_average: list = []
-        for i in range(self._total_key_values):
+        for i in range(self._total_key_values):  # Each of the possible mark locations 
             temp_x_sum: int = 0
             temp_y_sum: int = 0
             temp_average_x: int = 0
             temp_average_y: int = 0
-            for j in range(len(self._sorted_key_values)):
+            for j in range(len(self._sorted_key_values)):  # Each of the keys and their identical spots. 
                 temp_x_sum += self._sorted_key_values[j][i][0]
                 temp_y_sum += self._sorted_key_values[j][i][1]
             temp_average_x = int(temp_x_sum / len(self._sorted_key_values))
@@ -364,7 +369,7 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def _update_scantron_bubbles(self):
         """
-        Taking the new values from _get_key_average() and updating the dict. 
+        Taking the new values from _get_key_average() and updating the dict. \n
         These are to be used in Bubble_Sheet when it is passed to the game sheets to determine what was selected.
         """
         for key in self._bubble_location:
@@ -472,7 +477,7 @@ class OMR():
 # ----------------------------------------------------------------------------------------------------------------------
     def get_key_values(self) -> dict:
         """
-        Method for getting the key values.
+        Method for getting the key values. \n
         Returns:
             dict: Averaged values for the location of all the bubble locations on the scantron sheet.
         """
@@ -481,7 +486,7 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def get_game_sheet_values(self) -> list[tuple]:
         """
-        Method for getting the game sheet values.
+        Method for getting the game sheet values. \n
         Returns:
             list[tuple]: List of tuples containing the values for each of the game sheets that was read into it.
         """
