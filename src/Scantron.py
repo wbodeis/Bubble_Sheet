@@ -370,9 +370,11 @@ class Scantron():
     def _determine_team_number(self) -> None:
         """ 
         Determinging the team's number. \n
+        Previously had a break once the 4th value was found. That was removed in case there is a double/triple finding from a poor marking. \n
         Defaults to 0000 if nothing was entered or detected. 
         """
-        temp_team_number: list = [0,0,0,0]
+        temp_team_number: list[int] = [0,0,0,0]
+        temp_team_num_filled: list[bool] = [False, False, False, False]
         count: int = 0
         for i in range(len(self.scantron_data)):
             temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
@@ -385,25 +387,29 @@ class Scantron():
                 temp_key_y = value[0][1]
 
                 if ((temp_key_x <= temp_x_upper  
-                    and temp_key_x >= temp_x_lower
-                    and temp_key_y <= temp_y_upper
-                    and temp_key_y >= temp_y_lower)
-                    and key in self._team_number_location):
+                     and temp_key_x >= temp_x_lower
+                     and temp_key_y <= temp_y_upper
+                     and temp_key_y >= temp_y_lower)
+                     and key in self._team_number_location):
 
+                    if not temp_team_num_filled[self._team_number_location[key][1]]:
                         temp_team_number[self._team_number_location[key][1]] = self._team_number_location[key][0]
+                        temp_team_num_filled[self._team_number_location[key][1]] = True
                         count += 1
-                        continue
             if count == 4:
                 break
+
         self._raw_data['Team'][1] = ''.join(str(e) for e in temp_team_number)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _determine_match_numbner(self) -> None:
         """ 
         Determinging the match the team played in. \n
+        Previously had a break once the 2nd value was found. That was removed in case there is a double/triple finding from a poor marking. \n
         Defaults to 00 if nothing was entered or detected. 
         """
-        temp_match_number: list = [0,0]
+        temp_match_number: list[int] = [0,0]
+        temp_match_num_filled: list[bool] = [False, False]
         count: int = 0
         for i in range(len(self.scantron_data)):
             temp_x_upper = self.scantron_data[i][0] + self.pixel_differential
@@ -421,11 +427,14 @@ class Scantron():
                      and temp_key_y >= temp_y_lower)
                      and key in self._match_number_location):
 
+                     if not temp_match_num_filled[self._match_number_location[key][1]]:
                         temp_match_number[self._match_number_location[key][1]] = self._match_number_location[key][0]
+                        temp_match_num_filled[self._match_number_location[key][1]] = True
                         count += 1
                         continue
             if count == 2:
                 break
+
         self._raw_data['Match'][1] = ''.join(str(e) for e in temp_match_number)
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -548,3 +557,9 @@ class Scantron():
                   Each key should correlate directly the column in the raw data section of the gooogle sheet. 
         """
         return {k: v[1] for k,v in self._raw_data.items()}
+
+# ======================================================================================================================
+# Main
+# ----------------------------------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    Scantron()

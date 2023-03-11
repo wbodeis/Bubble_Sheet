@@ -59,8 +59,6 @@ class Bubble_Sheet():
     def main(self):
         """
         For running all the data processing. It invokes all of the classes and methods to then save the data as a csv.
-        TODO Figure out the processing pool to multithread the processing. 
-        TODO Nest try-excepts? They're all needed one after another, or maybe seperat method calls?
         """
         try:
             self._OMR_data = OMR(cpu_threads = self._cpu_threads,
@@ -89,8 +87,8 @@ class Bubble_Sheet():
             self._game_sheet_data.append(sheet._get_raw_data())
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
-        print(self._df)
-        # self._save_file()
+        # print(self._df.sort_values('Match'))
+        self._save_file()
 
 # ======================================================================================================================
 # Low Level Private Functions

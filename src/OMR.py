@@ -376,7 +376,12 @@ class OMR():
             self._bubble_location[key][0] = self._scanned_keys_average[key]
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _process_images_executor(self, image_directory: int, image_name: str, data: str, color: str, save_image_overlay: bool) -> tuple:
+    def _process_images_executor(self,
+                                 image_directory: int,
+                                 image_name: str,
+                                 data: str,
+                                 color: str,
+                                 save_image_overlay: bool) -> tuple:
         """
         Method for gathering all of the spots where the paper is marked. 
         Changed over to work with multithreading to help speed up the processing time. 
