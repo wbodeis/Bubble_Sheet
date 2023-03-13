@@ -98,9 +98,9 @@ class Bubble_Sheet():
         List of the folder locations used for reading and writing the data.
         Used as a method call to have a more visual appearance of what was needed by the program.
         """
-        self._directories.append('key_pdf/')                # 0
+        self._directories.append('key_pdf/')            # 0
         self._directories.append('key_images/')         # 1
-        self._directories.append('scantron_pdf/')           # 2
+        self._directories.append('scantron_pdf/')       # 2
         self._directories.append('scantron_images/')    # 3
         self._directories.append('results/')            # 4
         
