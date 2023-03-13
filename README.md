@@ -23,9 +23,9 @@ pyinstaller = "^5.8.0"
 
 ## Folders
 You need the following folders:  
-- key/
+- key_pdf/
 - key_images/
-- scantron/
+- scantron_pdf/
 - scantron_images/
 - results/  
 - poppler/
