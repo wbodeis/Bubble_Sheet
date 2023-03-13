@@ -2,7 +2,7 @@
 Project: OMR Scantron for FRC Team 5712  
 Author: William Bodeis <wdbodeis@gmail.com>  
 
-This is to be used with the pdf included in this project (Game_Sheet.pdf) specific to the FIRST 2023 season "Charged Up."  
+This is to be used with the pdf included in this project (Game_Sheet.pdf at the current version) specific to the FIRST 2023 season "Charged Up."  
 The folders are needed and the program will first check for those. If they are not there, it will create them before exiting to be sure all the files are in the correct folders.  
 It will also close if there aren't any keys or game sheets to be read in and used, since there is no point in running the program without either available.  
 
@@ -23,10 +23,10 @@ pyinstaller = "^5.8.0"
 
 ## Folders
 You need the following folders:  
-- key_pdf/
 - key_images/
-- scantron_pdf/
+- key_pdf/
 - scantron_images/
+- scantron_pdf/
 - results/  
 - poppler/
 
