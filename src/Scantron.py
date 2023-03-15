@@ -544,6 +544,12 @@ class Scantron():
                             self._raw_data['Community'][1] = 1
                         elif key == 150:
                             self._raw_data['Auton Charge Station'][1] = 2
+                        elif key == 151: 
+                            self._raw_data['HP & CS'][1] = 1
+                        elif key == 152: 
+                            self._raw_data['Over Charge'][1] = 1
+                        elif key == 153: 
+                            self._raw_data['ST & CS'][1] = 1
                         elif key == 154:
                             self._raw_data['Tele Charge Station'][1] = 2
 
