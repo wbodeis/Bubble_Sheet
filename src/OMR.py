@@ -7,7 +7,7 @@
 # ======================================================================================================================
 # Standard Imports
 # ----------------------------------------------------------------------------------------------------------------------
-import os, cv2, numpy as np
+import os, cv2, re, numpy as np
 from pdf2image import convert_from_path
 from concurrent.futures import ProcessPoolExecutor as ppe
 from itertools import repeat
@@ -260,12 +260,24 @@ class OMR():
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         with ppe(max_workers = cpu_threads) as executor:
-            executor_keys = executor.map(self._process_images_executor, repeat(1), self._key_names, repeat('key'), repeat(self.mark_color), repeat(self.save_image_overlay))
+            executor_keys = executor.map(self._process_images_executor,
+                                         repeat(1),
+                                         self._key_names,
+                                         repeat('key'),
+                                         repeat(self.mark_color),
+                                         repeat(self.save_image_overlay))
+
         self._scanned_keys = tuple(executor_keys)
 
         # Getting the values from the game sheets. 
         with ppe(max_workers = cpu_threads) as executor:
-            executor_scantron = executor.map(self._process_images_executor, repeat(3), self._scantron_names, repeat('scantron'), repeat(self.mark_color), repeat(self.save_image_overlay))
+            executor_scantron = executor.map(self._process_images_executor,
+                                             repeat(3),
+                                             self._scantron_names,
+                                             repeat('scantron'),
+                                             repeat(self.mark_color),
+                                             repeat(self.save_image_overlay))
+
         self._scanned_values = tuple(executor_scantron)
 
         self._sort_key_values()
@@ -296,6 +308,15 @@ class OMR():
     def _get_scantron_image_names(self) -> None:
         """ Creating list of strings from the image files of game sheets. """
         self._scantron_names = [i for i in os.listdir(self.directories[3]) if (i.endswith('.' + self.image_format))]
+
+#-----------------------------------------------------------------------------------------------------------------------    
+    def _change_names(self, names: list, data: str, file_type: str):
+        enum_list = enumerate(names, 1)
+        # TODO Figure out the best way to change the files' names. 
+
+#-----------------------------------------------------------------------------------------------------------------------    
+    def _sub_name(self, name: str) -> str:
+        return re.sub('[^A-Za-z_-]', '', input)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_image(self, pdf_directory: int, image_directory: int, pdf_names: list[str]) -> None:
