@@ -7,7 +7,10 @@
 # ======================================================================================================================
 # Standard Imports
 # ----------------------------------------------------------------------------------------------------------------------
-import os, cv2, re, numpy as np
+import os
+import cv2
+import re
+import numpy as np
 from pdf2image import convert_from_path
 from concurrent.futures import ProcessPoolExecutor as ppe
 from itertools import repeat
