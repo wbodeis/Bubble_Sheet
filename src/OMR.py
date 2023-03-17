@@ -241,22 +241,45 @@ class OMR():
         if not self._keys_pdf_names:
             print('No keys were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
-            self._convert_pdf_to_image(0, 1, self._keys_pdf_names)
+            self._change_names(names = self._keys_pdf_names,
+                               directory = self.directories[0],
+                               data = 'Key',
+                               file_type='.pdf')
+
+            self._convert_pdf_to_image(pdf_directory = 0, 
+                                       image_directory = 1, 
+                                       pdf_names = self._keys_pdf_names)
 
         if not self._scantron_pdf_names:
             print('No game sheets were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
-            self._convert_pdf_to_image(2, 3, self._scantron_pdf_names)
+            self._change_names(names = self._scantron_pdf_names,
+                               directory = self.directories[2],
+                               data = 'Scantron',
+                               file_type='.pdf')
+
+            self._convert_pdf_to_image(pdf_directory = 2,
+                                       image_directory = 3, 
+                                       pdf_names = self._scantron_pdf_names)
         
+        # Changing the name(s) of the key image(s)
+        self._change_names(directory = self.directories[1],
+                           data = 'Key',
+                           file_type = '.' + self.image_format)
+        
+        # Changing the name(s) of the scantron image(s)
+        self._change_names(directory = self.directories[3],
+                           data = 'Scantron',
+                           file_type = '.' + self.image_format)
         # Getting the names of the images to run the data. 
         self._get_key_image_names()
         self._get_scantron_image_names()
         if not self._key_names:
             del self
-            raise FileExistsError('No image for key(s) to process were found.')
+            raise FileExistsError('No image(s) for key(s) to process were found.')
         if not self._scantron_names:
             del self
-            raise FileExistsError('No image for game sheets(s) to process were found.')
+            raise FileExistsError('No image(s) for game sheets(s) to process were found.')
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         with ppe(max_workers = cpu_threads) as executor:
@@ -310,13 +333,34 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self.directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------    
-    def _change_names(self, names: list, data: str, file_type: str):
-        enum_list = enumerate(names, 1)
-        # TODO Figure out the best way to change the files' names. 
+    def _change_names(self, directory: str, data: str, file_type: str):
+        """
+        Going through the given directory and changing the names of the files for each of the ones it finds. 
 
+        Args:
+            directory (str): Folder where the files need to be changed. 
+            data (str): Mostly for renaming and differentiating between keys and game sheets. 
+            file_type (str): The file type that each  will be renamed. 
+        """
+        enum_list = [i for i in enumerate(os.scandir(directory), 0) if i[1].name.endswith(file_type)]
+        for name in enum_list:
+            source = directory + name[1].name
+            destination = directory + data + '_' + str(name[0] + 1) + file_type
+            os.rename(source, destination)
+        
 #-----------------------------------------------------------------------------------------------------------------------    
     def _sub_name(self, name: str) -> str:
-        return re.sub('[^A-Za-z_-]', '', input)
+        """
+        CURRENTLY UNUSED.
+        Taking a string and removing everything but alphanumerics, dashes, and underscores. 
+
+        Args:
+            name (str): Name to be changed. 
+
+        Returns:
+            str: New name meeting the substitution criteria. 
+        """
+        return re.sub('[^0-9A-Za-z_-]', '', name)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_image(self, pdf_directory: int, image_directory: int, pdf_names: list[str]) -> None:
