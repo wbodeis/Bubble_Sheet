@@ -336,26 +336,33 @@ class OMR():
         self._scantron_names = [i for i in os.listdir(self.directories[3]) if (i.endswith('.' + self.image_format))]
 
 #-----------------------------------------------------------------------------------------------------------------------    
-    def _change_names(self, directory: str, data: str, file_type: str):
+    def _change_names(self,
+                      directory: str,
+                      data: str,
+                      file_type: str):
         """
-        Going through the given directory and changing the names of the files for each of the ones it finds. 
-
+        Going through the given directory and changing the names of the files for each of the ones it finds. \n
+        enum_list is an iterable (nt.ScandirIterator) of all the files of the given type in that location. \n
+        Those are then enumerated such that each name of them is a tuple with their given number (1, file_name). \n
+        The files gets renamed as Key_1 or Scantron_1, and so on, depending on which is being checked. \n
+        
         Args:
             directory (str): Folder where the files need to be changed. 
             data (str): Mostly for renaming and differentiating between keys and game sheets. 
             file_type (str): The file type that each  will be renamed. 
         """
-        enum_list = [i for i in enumerate(os.scandir(directory), 0) if i[1].name.endswith(file_type)]
+        enum_list = [i for i in enumerate(os.scandir(directory), 1) if i[1].name.endswith(file_type)]
         for name in enum_list:
             source = directory + name[1].name
-            destination = directory + data + '_' + str(name[0] + 1) + file_type
+            destination = directory + data + '_' + str(name[0]) + file_type
             os.rename(source, destination)
         
 #-----------------------------------------------------------------------------------------------------------------------    
-    def _sub_name(self, name: str) -> str:
+    def _sub_name(self,
+                  name: str) -> str:
         """
-        CURRENTLY UNUSED.
-        Taking a string and removing everything but alphanumerics, dashes, and underscores. 
+        CURRENTLY UNUSED. \n
+        Taking a string and removing everything but alphanumerics, dashes, and underscores. \n
 
         Args:
             name (str): Name to be changed. 
@@ -366,9 +373,15 @@ class OMR():
         return re.sub('[^0-9A-Za-z_-]', '', name)
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _convert_pdf_to_image(self, pdf_directory: int, image_directory: int, pdf_names: list[str]) -> None:
+    def _convert_pdf_to_image(self,
+                              pdf_directory: int,
+                              image_directory: int, 
+                              pdf_names: list[str]) -> None:
         """
         Taking the various pdf files and converting them to an image of the specified file type from the class init. \n
+        Outter loop is used for each pdf file that is found in the location. \n
+        Inner loop is for each page within the pdf. \n
+
         Args:
             pdf_directory (int): Index for the list of folder names.
             image_directory (int): Index for the list of folder names.
@@ -451,7 +464,7 @@ class OMR():
                                  color: str,
                                  save_image_overlay: bool) -> tuple:
         """
-        Method for gathering all of the spots where the paper is marked. 
+        Method for gathering all of the spots where the paper is marked. \n
         Changed over to work with multithreading to help speed up the processing time. 
 
 
