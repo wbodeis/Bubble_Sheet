@@ -28,7 +28,8 @@ class OMR():
                  image_format: str = 'jpg',
                  save_image_overlay: bool = False,
                  mark_color: str = 'blue') -> None:
-        """_summary_
+        """
+        Everything as far as data collection and saving is ran in this guy. 
 
         Args:
             cpu_threads (int): Total CPU threads found and passed to it for converting the pdf files.
@@ -49,7 +50,7 @@ class OMR():
         self.cpu_threads: int = cpu_threads
         self.image_format: str = image_format
         self.save_image_overlay: bool = save_image_overlay
-        self.mark_color: str = mark_color.lower()
+        self.mark_color: str = mark_color
         self.directories: list[str] = directories
 
         # Created within and used by the class. 
@@ -238,31 +239,31 @@ class OMR():
 
         # Initializing functions.
         # Checking for and converting pdf files if those are used instead of pictures.
-        self._get_key_pdf_names()
-        self._get_scantron_pdf_names()
-        
-        if not self._keys_pdf_names:
+
+        # First the keys. 
+        if not os.listdir(self.directories[0]):
             print('No keys were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
-            self._change_names(names = self._keys_pdf_names,
-                               directory = self.directories[0],
+            self._change_names(directory = self.directories[0],
                                data = 'Key',
                                file_type='.pdf')
-
+            self._get_key_pdf_names()
             self._convert_pdf_to_image(pdf_directory = 0, 
-                                       image_directory = 1, 
+                                       image_directory = 1,
+                                       data = 'Key',
                                        pdf_names = self._keys_pdf_names)
-
-        if not self._scantron_pdf_names:
+        
+        # Now the game sheets.
+        if not os.listdir(self.directories[2]):
             print('No game sheets were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
-            self._change_names(names = self._scantron_pdf_names,
-                               directory = self.directories[2],
+            self._change_names(directory = self.directories[2],
                                data = 'Scantron',
                                file_type='.pdf')
-
+            self._get_scantron_pdf_names()
             self._convert_pdf_to_image(pdf_directory = 2,
-                                       image_directory = 3, 
+                                       image_directory = 3,
+                                       data = 'Scantron',
                                        pdf_names = self._scantron_pdf_names)
         
         # Changing the name(s) of the key image(s)
@@ -345,18 +346,26 @@ class OMR():
         enum_list is an iterable (nt.ScandirIterator) of all the files of the given type in that location. \n
         Those are then enumerated such that each name of them is a tuple with their given number (1, file_name). \n
         The files gets renamed as Key_1 or Scantron_1, and so on, depending on which is being checked. \n
+        It can't save a file with the same name that already exists so its enum value is stepped by 1 until it can be saved.
         
         Args:
             directory (str): Folder where the files need to be changed. 
             data (str): Mostly for renaming and differentiating between keys and game sheets. 
             file_type (str): The file type that each  will be renamed. 
         """
-        enum_list = [i for i in enumerate(os.scandir(directory), 1) if i[1].name.endswith(file_type)]
+        enum_list: list = [i for i in enumerate(os.scandir(directory), 1) if i[1].name.endswith(file_type)]
         for name in enum_list:
+            offset: int = 1
             source = directory + name[1].name
             destination = directory + data + '_' + str(name[0]) + file_type
-            os.rename(source, destination)
-        
+            while True:
+                try:
+                    os.rename(source, destination)
+                except:
+                    destination = directory + data + '_' + str(name[0] + offset) + file_type
+                    offset += 1
+                    continue
+                break
 #-----------------------------------------------------------------------------------------------------------------------    
     def _sub_name(self,
                   name: str) -> str:
@@ -375,7 +384,8 @@ class OMR():
 #-----------------------------------------------------------------------------------------------------------------------
     def _convert_pdf_to_image(self,
                               pdf_directory: int,
-                              image_directory: int, 
+                              image_directory: int,
+                              data: str, 
                               pdf_names: list[str]) -> None:
         """
         Taking the various pdf files and converting them to an image of the specified file type from the class init. \n
@@ -388,18 +398,20 @@ class OMR():
             pdf_names (list[str]): Names of the files to be converted from pdf. 
         """
         for i in range(len(pdf_names)):  # Each pdf
+        # for file in os.scandir(self.directories[pdf_directory]):
                 images = convert_from_path(pdf_path = self.directories[pdf_directory] + pdf_names[i],
+                # images = convert_from_path(pdf_path = self.directories[pdf_directory] + file.name,
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
                                            thread_count = self.cpu_threads)
 
                 for j in range(len(images)):  # Each page of the pdf
                     try:
-                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.' + self.image_format
+                        location = self.directories[image_directory] + data + '_' + str(i+1) + '-' + str(j+1) + '.' + self.image_format
                         images[j].save(fp = location,
                                        bitmap_format = self.image_format)
                     except:
-                        location = self.directories[image_directory] + str(i+1) + '-' + str(j+1) + '.jpg'
+                        location = self.directories[image_directory] + data + '_' + str(i+1) + '-' + str(j+1) + '.jpg'
                         images[j].save(fp = location,
                                        bitmap_format = 'jpg')
 
@@ -435,16 +447,13 @@ class OMR():
         """
         temp_key_average: list = []
         for i in range(self._total_key_values):  # Each of the possible mark locations 
-            temp_x_sum: int = 0
-            temp_y_sum: int = 0
-            temp_average_x: int = 0
-            temp_average_y: int = 0
+            temp_x_sum, temp_y_sum, temp_x_average, temp_y_average = 0, 0, 0, 0
             for j in range(len(self._sorted_key_values)):  # Each of the keys and their identical spots. 
                 temp_x_sum += self._sorted_key_values[j][i][0]
                 temp_y_sum += self._sorted_key_values[j][i][1]
-            temp_average_x = int(temp_x_sum / len(self._sorted_key_values))
-            temp_average_y = int(temp_y_sum / len(self._sorted_key_values))
-            temp_key_average.append(tuple((temp_average_x, temp_average_y)))
+            temp_x_average = int(temp_x_sum / len(self._sorted_key_values))
+            temp_y_average = int(temp_y_sum / len(self._sorted_key_values))
+            temp_key_average.append(tuple((temp_x_average, temp_y_average)))
         self._scanned_keys_average = tuple(temp_key_average)
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -466,7 +475,6 @@ class OMR():
         """
         Method for gathering all of the spots where the paper is marked. \n
         Changed over to work with multithreading to help speed up the processing time. 
-
 
         Args:
             image_directory (int): Index for the list of folder names.
@@ -534,7 +542,7 @@ class OMR():
                 result = img.copy() 
             for contour in contours:
                 M = cv2.moments(contour)
-                if M["m00"] != 0:
+                if M["m00"] != 0:  # For divide by zero erros the popped up a few times. 
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
                 else:
