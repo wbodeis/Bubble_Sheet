@@ -15,11 +15,6 @@ from pdf2image import convert_from_path
 from concurrent.futures import ProcessPoolExecutor as ppe
 from itertools import repeat
 
-# ======================================================================================================================
-# Custom Class Imports
-# ----------------------------------------------------------------------------------------------------------------------
-from Constants import Constants
-
 class OMR():
     """
     Optical Mark Recognition (OMR) \n
@@ -67,9 +62,180 @@ class OMR():
         self._scanned_keys: list = []
         self._sorted_key_values: list = []
         self._scanned_keys_average: tuple
-        self._key_column_index: tuple(int) = Constants.KEY_COLUMN_INDEX
-        self._total_key_values: int = Constants.TOTAL_KEY_VALUES
-        self._bubble_location: dict = Constants.BUBBLE_LOCATION
+        self._key_column_index: tuple(int) = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
+        self._total_key_values: int = 155
+        self._bubble_location: dict = {
+                                       # Column 1
+                                       0: [(905, 2335), 'Auton HP TL'],
+                                       1: [(903, 2497), 'Auton HP ML'],
+                                       2: [(903, 2658), 'Auton HP LLCone'],
+                                       3: [(903, 2818), 'Auton HP LLCube'],
+                                       4: [(897, 3949), 'Tele HP TL'],
+                                       5: [(896, 4110), 'Tele HP ML'],
+                                       6: [(896, 4271), 'Tele HP LLCone'],
+                                       7: [(896, 4433), 'Tele HP LLCube'],
+                                       # Column 2
+                                       8: [(1158, 1368), 'Blue Alliance'],
+                                       9: [(1157, 1529), 'Red Alliance'],
+                                       10: [(1154, 2336), 'Auton HP TM'],
+                                       11: [(1154, 2497), 'Auton HP MM'],
+                                       12: [(1153, 2658), 'Auton HP MLCone'],
+                                       13: [(1153, 2819), 'Auton HP MLCube'],
+                                       14: [(1147, 3949), 'Tele HP TM'],
+                                       15: [(1146, 4111), 'Tele HP MM'],
+                                       16: [(1146, 4272), 'Tele HP MLCone'],
+                                       17: [(1145, 4433), 'Tele HP MLCube'],
+                                       # Column 3
+                                       18: [(1408, 2337), 'Auton HP TR'],
+                                       19: [(1407, 2498), 'Auton HP MR'],
+                                       20: [(1406, 2658), 'Auton HP LRCone'],
+                                       21: [(1404, 2818), 'Auton HP LRCube'],
+                                       22: [(1400, 3950), 'Tele HP TR'],
+                                       23: [(1401, 4111), 'Tele HP MR'],
+                                       24: [(1399, 4271), 'Tele HP LRCone'],
+                                       25: [(1399, 4433), 'Tele HP LRCube'],
+                                       # Column 4
+                                       26: [(1651, 4918), 'Floor Yes'],
+                                       27: [(1651, 5076), 'Single Sub Yes'],
+                                       28: [(1650, 5234), 'Double Sub Slider Yes'],
+                                       29: [(1650, 5393), 'Double Sub Chute Yes'],
+                                       30: [(1648, 6353), 'Parked Yes'],
+                                       # Column 5
+                                       31: [(1913, 2338), 'Auton M TL'],
+                                       32: [(1912, 2498), 'Auton M ML'],
+                                       33: [(1912, 2660), 'Auton M LLCone'],
+                                       34: [(1911, 2819), 'Auton M LLCube'],
+                                       35: [(1906, 3950), 'Tele M TL'],
+                                       36: [(1905, 4111), 'Tele M ML'],
+                                       37: [(1905, 4272), 'Tele M LLCone'],
+                                       38: [(1905, 4434), 'Tele M LLCube'],
+                                       # Column 6
+                                       39: [(2175, 405), 'Match Deca Zero'],
+                                       40: [(2174, 569), 'Match Zero'],
+                                       41: [(2172, 1053), 'Team Kilo Zero'],
+                                       42: [(2170, 1211), 'Team Hecto Zero'],
+                                       43: [(2169, 1370), 'Team Deca Zero'],
+                                       44: [(2169, 1532), 'Team Zero'],
+                                       45: [(2166, 2338), 'Auton M TM'],
+                                       46: [(2165, 2499), 'Auton M MM'],
+                                       47: [(2165, 2660), 'Auton M MLCone'],
+                                       48: [(2164, 2820), 'Auton M MLCube'],
+                                       49: [(2163, 3142), 'Auton Charge Station On'],
+                                       50: [(2159, 3951), 'Tele M TM'],
+                                       51: [(2158, 4112), 'Tele M MM'],
+                                       52: [(2158, 4273), 'Tele M MLCone'],
+                                       53: [(2158, 4435), 'Tele M MLCube'],
+                                       54: [(2157, 4918), 'Floor No'],
+                                       55: [(2156, 5076), 'Single Sub No'],
+                                       56: [(2156, 5235), 'Double Sub Slider No'],
+                                       57: [(2155, 5393), 'Parked No'],
+                                       58: [(2154, 6031), 'End Game Charge Station On'],
+                                       59: [(2152, 6353), 'Parked No'],
+                                       # Column 7
+                                       60: [(2425, 406), 'Match Deca One'],
+                                       61: [(2425, 569), 'Match One'],
+                                       62: [(2422, 1053), 'Team Kilo One'],
+                                       63: [(2420, 1211), 'Team Hecto One'],
+                                       64: [(2419, 1371), 'Team Deca One'],
+                                       65: [(2419, 1532), 'Team One'],
+                                       66: [(2416, 2339), 'Auton M TR'],
+                                       67: [(2416, 2500), 'Auton M MR'],
+                                       68: [(2415, 2661), 'Auton M LRCone'],
+                                       69: [(2414, 2821), 'Auton M LRCube'],
+                                       70: [(2409, 3951), 'Tele M TR'],
+                                       71: [(2409, 4113), 'Tele M MR'],
+                                       72: [(2409, 4274), 'Tele M LRCone'],
+                                       73: [(2408, 4435), 'Tele M LRCube'],
+                                       # Column 8
+                                       74: [(2677, 406), 'Match Deca Two'],
+                                       75: [(2675, 570), 'Match Two'],
+                                       76: [(2673, 1054), 'Team Kilo Two'],
+                                       77: [(2671, 1213), 'Team Hecto Two'],
+                                       78: [(2671, 1372), 'Team Deca Two'],
+                                       79: [(2671, 1533), 'Team Two'],
+                                       # Column 9
+                                       80: [(2927, 409), 'Match Deca Three'],
+                                       81: [(2927, 573), 'Match Three'],
+                                       82: [(2923, 1056), 'Team Kilo Three'],
+                                       83: [(2922, 1214), 'Team Hecto Three'],
+                                       84: [(2921, 1374), 'Team Deca Three'],
+                                       85: [(2921, 1535), 'Team Three'],
+                                       86: [(2918, 2341), 'Auton ST TL'],
+                                       87: [(2916, 2503), 'Auton ST ML'],
+                                       88: [(2916, 2664), 'Auton ST LLCone'],
+                                       89: [(2915, 2824), 'Auton ST LLCube'],
+                                       90: [(2910, 3954), 'Tele ST TL'],
+                                       91: [(2910, 4114), 'Tele ST ML'],
+                                       92: [(2909, 4275), 'Tele ST LLCone'],
+                                       93: [(2909, 4437), 'Tele ST LLCube'],
+                                       # Column 10
+                                       94: [(3178, 410), 'Match Deca Four'],
+                                       95: [(3178, 573), 'Match Four'],
+                                       96: [(3175, 1057), 'Team Kilo Four'],
+                                       97: [(3174, 1216), 'Team Hecto Four'],
+                                       98: [(3173, 1375), 'Team Deca Four'],
+                                       99: [(3173, 1536), 'Team Four'],
+                                       100: [(3169, 2342), 'Auton ST TM'],
+                                       101: [(3169, 2504), 'Auton ST MM'],
+                                       102: [(3168, 2665), 'Auton ST MLCone'],
+                                       103: [(3168, 2823), 'Auton ST MLCube'],
+                                       104: [(3166, 3145), 'Auton Charge Station Balanced'],
+                                       105: [(3163, 3955), 'Tele ST TM'],
+                                       106: [(3162, 4115), 'Tele ST MM'],
+                                       107: [(3161, 4276), 'Tele ST MLCone'],
+                                       108: [(3161, 4439), 'Tele ST MLCube'],
+                                       109: [(3156, 6034), 'End Game Charge Station Balanced'],
+                                       # Column 11
+                                       110: [(3431, 410), 'Match Deca Five'],
+                                       111: [(3430, 574), 'Match Five'],
+                                       112: [(3427, 1058), 'Team Kilo Five'],
+                                       113: [(3426, 1217), 'Team Hecto Five'],
+                                       114: [(3426, 1376), 'Team Deca Five'],
+                                       115: [(3426, 1538), 'Team Five'],
+                                       116: [(3422, 2343), 'Auton ST TR'],
+                                       117: [(3422, 2505), 'Auton ST MR'],
+                                       118: [(3421, 2665), 'Auton ST LRCone'],
+                                       119: [(3420, 2825), 'Auton ST LRCube'],
+                                       120: [(3415, 3955), 'Tele ST TR'],
+                                       121: [(3415, 4116), 'Tele ST MR'],
+                                       122: [(3415, 4277), 'Tele ST LRCone'],
+                                       123: [(3415, 4438), 'Tele ST LRCube'],
+                                       # Column 12
+                                       124: [(3684, 412), 'Match Deca Six'],
+                                       125: [(3683, 576), 'Match Six'],
+                                       126: [(3680, 1060), 'Team Kilo Six'],
+                                       127: [(3679, 1217), 'Team Hecto Six'],
+                                       128: [(3679, 1377), 'Team Deca Six'],
+                                       129: [(3678, 1538), 'Team Six'],
+                                       # Column 13
+                                       130: [(3937, 412), 'Match Deca Seven'],
+                                       131: [(3936, 577), 'Match Seven'],
+                                       132: [(3933, 1061), 'Team Kilo Seven'],
+                                       133: [(3932, 1219), 'Team Hecto Seven'],
+                                       134: [(3931, 1379), 'Team Deca Seven'],
+                                       135: [(3931, 1539), 'Team Seven'],
+                                       # Column 14
+                                       136: [(4187, 414), 'Match Deca Eight'],
+                                       137: [(4187, 577), 'Match Eight'],
+                                       138: [(4184, 1061), 'Team Kilo Eight'],
+                                       139: [(4182, 1220), 'Team Hecto Eight'],
+                                       140: [(4182, 1379), 'Team Deca Eight'],
+                                       141: [(4182, 1540), 'Team Eight'],
+                                       # Column 15
+                                       142: [(4438, 415), 'Match Deca Nine'],
+                                       143: [(4437, 578), 'Match Nine'],
+                                       144: [(4434, 1063), 'Team Kilo Nine'],
+                                       145: [(4433, 1221), 'Team Hecto Nine'],
+                                       146: [(4433, 1381), 'Team Deca Nine'],
+                                       147: [(4433, 1541), 'Team Nine'],
+                                       148: [(4429, 2346), 'Left Community Yes'],
+                                       149: [(4428, 2508), 'Left Community No'],
+                                       150: [(4425, 3150), 'Auton Charge Station Not Attempted'],
+                                       151: [(4419, 4925), 'Travel Between HP and CS'],
+                                       152: [(4418, 5082), 'Travel Over Charge'],
+                                       153: [(4417, 5241), 'Travel Between ST and CS'],
+                                       154: [(4414, 6037), 'End Game Charge Station Not Attempted']
+                                       }
 
         # Initializing functions.
         # Checking for and converting pdf files if those are used instead of pictures.

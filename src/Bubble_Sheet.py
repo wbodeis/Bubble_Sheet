@@ -143,14 +143,13 @@ class Bubble_Sheet():
         """
         Saving the averaged key values to update Constants._bubble_location.
         """
-        from Constants import Constants
         time_now: datetime = datetime.now()
         file_name: str = re.sub('-|:|\.|\s', '_', str(time_now)) + '.txt'
         path: str = 'results/' + file_name
         count = 1
         with open(path, 'w') as f: 
             for key, value in self._bubble_location.items():
-                if key in Constants.KEY_COLUMN_INDEX:
+                if key in self._OMR_data._key_column_index:
                     f.write('# Column %d\n' % count)
                     count += 1
                 f.write('%s: %s,\n' % (key, value))
