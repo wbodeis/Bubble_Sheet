@@ -112,6 +112,7 @@ class OMR():
         self._get_key_image_names()
         self._get_scantron_image_names()
         if not self._key_names:
+            # TODO Ask if the Constants._bubble_location should be used if none were found? 
             del self
             raise FileExistsError('No image(s) for key(s) to process were found.')
         if not self._scantron_names:

@@ -24,6 +24,7 @@ class Bubble_Sheet():
     """
     Highest level class for running and acquiring the game data. 
     TODO Maybe get the arguments for OMR and Scantron as inputs for the init.
+    TODO Potentially use the averaged keys from Constants._bubble_location in case no keys were found? In the OMR init check. 
     """
     def __init__(self,
                  pixel_differential: int = 50) -> None:
@@ -92,7 +93,8 @@ class Bubble_Sheet():
         
         self._df = pd.DataFrame.from_dict(self._game_sheet_data)
         # print(self._df.sort_values('Match'))
-        self._save_file()
+        self._save_game_data()
+        # self._save_key_dict()
 
 # ======================================================================================================================
 # Low Level Private Functions
@@ -128,13 +130,31 @@ class Bubble_Sheet():
             self._cpu_threads = 1
 
 #-----------------------------------------------------------------------------------------------------------------------
-    def _save_file(self):
+    def _save_game_data(self):
         """ Saving the data as a csv with a the current time as it's name so nothing saves over previous datasets. """
         time_now: datetime = datetime.now()
         file_name: str = re.sub('-|:|\.|\s', '_', str(time_now)) + '.csv'
         path: str = 'results/' + file_name
         self._df.to_csv(path_or_buf = path,
                         index = False)
+
+#-----------------------------------------------------------------------------------------------------------------------
+    def _save_key_dict(self):
+        """
+        Saving the averaged key values to update Constants._bubble_location.
+        """
+        from Constants import Constants
+        time_now: datetime = datetime.now()
+        file_name: str = re.sub('-|:|\.|\s', '_', str(time_now)) + '.txt'
+        path: str = 'results/' + file_name
+        count = 1
+        with open(path, 'w') as f: 
+            for key, value in self._bubble_location.items():
+                if key in Constants._key_column_index:
+                    f.write('# Column %d\n' % count)
+                    count += 1
+                f.write('%s: %s,\n' % (key, value))
+
 
 # ======================================================================================================================
 # Main
