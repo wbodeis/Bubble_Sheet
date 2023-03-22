@@ -5,9 +5,9 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src\\Bubble_Sheet.py'],
+    ['src/Bubble_Sheet.py'],
     pathex=[],
-    binaries=[],
+    binaries=[('poppler/', 'binary')],
     datas=[],
     hiddenimports=[],
     hookspath=[],

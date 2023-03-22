@@ -20,6 +20,9 @@ from datetime import datetime
 from OMR import OMR
 from Scantron import Scantron
 
+# ======================================================================================================================
+# Bubble_Sheet Class
+# ----------------------------------------------------------------------------------------------------------------------
 class Bubble_Sheet():
     """
     Highest level class for running and acquiring the game data. 
@@ -163,3 +166,5 @@ if __name__ == "__main__":
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
     Bubble_Sheet().main()
+
+# End of file.

@@ -2,15 +2,17 @@
 Project: OMR Scantron for FRC Team 5712  
 Author: William Bodeis <wdbodeis@gmail.com>  
 
-This is to be used with the pdf included in this project (Game_Sheet.pdf at the current version) specific to the FIRST 2023 season "Charged Up."  
+This is to be used with the pdf included in this project (Game_Sheet_Ver_XXX.pdf) specific to the FIRST 2023 season "Charged Up."  
 The folders are needed and the program will first check for those. If they are not there, it will create them before exiting to be sure all the files are in the correct folders.  
 It will also close if there aren't any keys or game sheets to be read in and used, since there is no point in running the program without either available.  
+Pyinstaller is apart of the dependencies to create the standalone executable so more people are able to run it. The .spec sheet is also included for creating the .exe.
+The only thing missing is poppler, which is talked about more below and how to download the folder you need.  
 
 ## Environment
 Poetry was used for creating and running the environment for this project.  
 > [Poetry Homepage](https://python-poetry.org/)  
 
-The pyproject.toml was also included to be used or the dependencies are listed below to use with whatever your preferred environment may be.  
+The pyproject.toml was also included to be used or the dependencies are listed below to use with whatever your preferred program to create virutal environments.  
 
 ### Dependencies
 python = ">=3.10,<3.12"  
@@ -28,7 +30,6 @@ You need the following folders:
 - scantron_images/
 - scantron_pdf/
 - results/  
-- poppler/
 
 These will be created if they don't already exist when the program runs, causing FileNotFoundError because it is assumed the files are not in the correct locations.  
 Once the folders are created and contain the necessary files, it will run all the way through.  
@@ -65,7 +66,6 @@ Everything is stored in the object and returned using _get_raw_data().
 
 
 ## Running the executable. 
-
 It is recommended to use powershell to run the script so you can see the readout if there are any errors that occur.
 You can run it by clicking it as you norammlly would, but the console closes as soon as it gets done running.
 
@@ -76,23 +76,24 @@ cd C:\Users\Administrator\Desktop\Bubble_Sheet_Portable
 Then the name of the exe to run it. You need the beginning '.\\' for it to run properly.
 A shortcut is to begin typing its name, like bubb, then hit tab and it will autofill the rest for you. 
 
-.\Bubble_Sheet_Portable_0.3.1.exe
+.\Bubble_Sheet_Portable_X.X.X.exe
 
 key/
-- save the pdf key files here  
+- Save the pdf key files here  
 
 key_images/
-- save the image key files here  
+- Save the image key files here  
 
 scantron/
-- save the pdf game sheet files here  
+- Save the pdf game sheet files here  
 
 scantron_images/
-- save the image game sheet files here  
+- Save the image game sheet files here  
 
 results/
 - .csv after gathering the data is saved here  
 
 poppler/
-- required for converting pdf files into .jpeg or whatever your chosen image format may be.
-- version 23.01.0 is what was included in the folder
+- Now incorporated with the executable so the folder now longer needs to be included.
+- Required for converting pdf files into .jpeg or whatever your chosen image format may be.
+- Version 23.01.0 currently being used with the executable. 
