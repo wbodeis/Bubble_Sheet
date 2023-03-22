@@ -67,9 +67,9 @@ class OMR():
         self._scanned_keys: list = []
         self._sorted_key_values: list = []
         self._scanned_keys_average: tuple
-        self._key_column_index: tuple(int) = Constants._key_column_index
-        self._total_key_values: int = Constants._total_key_values
-        self._bubble_location: dict = Constants._bubble_location
+        self._key_column_index: tuple(int) = Constants.KEY_COLUMN_INDEX
+        self._total_key_values: int = Constants.TOTAL_KEY_VALUES
+        self._bubble_location: dict = Constants.BUBBLE_LOCATION
 
         # Initializing functions.
         # Checking for and converting pdf files if those are used instead of pictures.
@@ -114,10 +114,10 @@ class OMR():
         if not self._key_names:
             # TODO Ask if the Constants._bubble_location should be used if none were found? 
             del self
-            raise FileExistsError('No image(s) for key(s) to process were found.')
+            raise FileNotFoundError('No image(s) for key(s) to process were found.')
         if not self._scantron_names:
             del self
-            raise FileExistsError('No image(s) for game sheets(s) to process were found.')
+            raise FileNotFoundError('No image(s) for game sheets(s) to process were found.')
         
         # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
         with ppe(max_workers = cpu_threads) as executor:

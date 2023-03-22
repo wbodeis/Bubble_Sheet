@@ -12,9 +12,9 @@ class Constants():
     reading through them. 
     """
     # OMR
-    _key_column_index: tuple = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
-    _total_key_values: int = 155
-    _bubble_location: dict = {
+    KEY_COLUMN_INDEX: tuple = (0, 8, 18, 26, 31, 39, 60, 74, 80, 94, 110, 124, 130, 136, 142)
+    TOTAL_KEY_VALUES: int = 155
+    BUBBLE_LOCATION: dict = {
                               # Column 1
                               0: [(905, 2335), 'Auton HP TL'],
                               1: [(903, 2497), 'Auton HP ML'],
@@ -187,7 +187,7 @@ class Constants():
                               154: [(4414, 6037), 'End Game Charge Station Not Attempted']
                               }
     # Scantrona
-    _raw_data = {
+    RAW_DATA = {
                  'Team': [0, 0],
                  'Match': [1, 0],
                  'Alliance': [2, 0],
@@ -275,7 +275,7 @@ class Constants():
                  'Tele Charge Station': [84, 0],
                  'Parked': [85, 0]
                  }
-    _team_number_location = {
+    TEAM_NUMBER_LOCATION = {
                              41: [0, 0],
                              42: [0, 1],
                              43: [0, 2],
@@ -317,7 +317,7 @@ class Constants():
                              146: [9, 2],
                              147: [9, 3]
                              }
-    _match_number_location = {
+    MATCH_NUMBER_LOCATION = {
                               39: [0, 0],
                               40: [0, 1],
                               60: [1, 0],
@@ -339,11 +339,11 @@ class Constants():
                               142: [9, 0],
                               143: [9, 1]
                               }
-    _alliance_location = {
+    ALLIANCE_LOCATION = {
                           8: [0],
                           9: [1]
                           }
-    _game_red_results_locations: dict = {
+    GAME_RED_RESULTS_LOCATIONS: dict = {
                                          0: 'Auton HP TL',
                                          1: 'Auton HP ML',
                                          2: 'Auton HP LLCone',
@@ -417,7 +417,7 @@ class Constants():
                                          122: 'Tele ST LRCone',
                                          123: 'Tele ST LRCube'
                                          }
-    _game_blue_results_locations = {
+    GAME_BLUE_RESULTS_LOCATIONS = {
                                     0: 'Auton ST TL',
                                     1: 'Auton ST ML',
                                     2: 'Auton ST LLCone',
@@ -491,7 +491,7 @@ class Constants():
                                     122: 'Tele HP LRCone',
                                     123: 'Tele HP LRCube'
                                     }
-    _play_style_location = {
+    PLAY_STYLE_LOCATION = {
                             26: 'Floor Yes',
                             27: 'Single Sub Yes',
                             28: 'Double Sub Slider Yes',
@@ -514,4 +514,3 @@ class Constants():
                             153: 'Travel Between ST and CS',
                             154: 'End Game Charge Station Not Attempted'
                             }
-

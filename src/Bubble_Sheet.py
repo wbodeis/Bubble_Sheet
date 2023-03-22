@@ -150,7 +150,7 @@ class Bubble_Sheet():
         count = 1
         with open(path, 'w') as f: 
             for key, value in self._bubble_location.items():
-                if key in Constants._key_column_index:
+                if key in Constants.KEY_COLUMN_INDEX:
                     f.write('# Column %d\n' % count)
                     count += 1
                 f.write('%s: %s,\n' % (key, value))

@@ -34,13 +34,13 @@ class Scantron():
         self.pixel_differential = pixel_differential
 
         # Dictionaries for storing the various results. 
-        self._raw_data: dict = Constants._raw_data
-        self._team_number_location: dict = Constants._team_number_location
-        self._match_number_location: dict = Constants._match_number_location
-        self._alliance_location: dict = Constants._alliance_location
-        self._game_red_results_locations: dict = Constants._game_red_results_locations
-        self._game_blue_results_locations: dict = Constants._game_blue_results_locations
-        self._play_style_location: dict = Constants._play_style_location
+        self._raw_data: dict = Constants.RAW_DATA
+        self._team_number_location: dict = Constants.TEAM_NUMBER_LOCATION
+        self._match_number_location: dict = Constants.MATCH_NUMBER_LOCATION
+        self._alliance_location: dict = Constants.ALLIANCE_LOCATION
+        self._game_red_results_locations: dict = Constants.GAME_RED_RESULTS_LOCATIONS
+        self._game_blue_results_locations: dict = Constants.GAME_BLUE_RESULTS_LOCATIONS
+        self._play_style_location: dict = Constants.PLAY_STYLE_LOCATION
 
         # Function calls to collate the data.
         self._determine_team_number()
