@@ -288,27 +288,52 @@ class OMR():
             del self
             raise FileNotFoundError('No image(s) for game sheets(s) to process were found.')
         
-        # Getting the marks for the scantron key(s) that are entered and the actual game sheets. 
-        with ppe(max_workers = cpu_threads) as executor:
-            executor_keys = executor.map(self._process_images_executor,
-                                         repeat(1),
-                                         self._key_names,
-                                         repeat('key'),
-                                         repeat(self.mark_color),
-                                         repeat(self.save_image_overlay))
+        # Getting the marks for the scantron key(s) that are entered and the actual game sheets.
+        try:
+            with ppe(max_workers = cpu_threads) as executor:
+                executor_keys = executor.map(self._process_images_executor,
+                                            repeat(1),
+                                            self._key_names,
+                                            repeat('key'),
+                                            repeat(self.mark_color),
+                                            repeat(self.save_image_overlay))
 
-        self._scanned_keys = tuple(executor_keys)
+            self._scanned_keys = tuple(executor_keys)
+        # Catching if the computer doesn't have enough ram to allocate the multithreading. 
+        except:
+            print('An error occured trying to multithread the key processing. Attempting to run them one at a time.')
+            try:
+                self._process_images(image_directory = 1, 
+                                     image_names = self._key_names, 
+                                     data = 'key',
+                                     color = self.mark_color)
+            
+            except:
+                del self
+                raise RuntimeError('Could not process the keys(s).')
+        
+        # Getting the values from the game sheets.
+        try:
+            with ppe(max_workers = cpu_threads) as executor:
+                executor_scantron = executor.map(self._process_images_executor,
+                                                repeat(3),
+                                                self._scantron_names,
+                                                repeat('scantron'),
+                                                repeat(self.mark_color),
+                                                repeat(self.save_image_overlay))
 
-        # Getting the values from the game sheets. 
-        with ppe(max_workers = cpu_threads) as executor:
-            executor_scantron = executor.map(self._process_images_executor,
-                                             repeat(3),
-                                             self._scantron_names,
-                                             repeat('scantron'),
-                                             repeat(self.mark_color),
-                                             repeat(self.save_image_overlay))
-
-        self._scanned_values = tuple(executor_scantron)
+            self._scanned_values = tuple(executor_scantron)
+        # Catching if the computer doesn't have enough ram to allocate the multithreading. 
+        except:
+            print('An error occured trying to multithread the game sheet processing. Attempting to run them one at a time.')
+            try:
+                self._process_images(image_directory = 3,
+                                     image_names = self._scantron_names,
+                                     data = 'scantron',
+                                     color = self.mark_color)
+            except:
+                del self
+                raise RuntimeError('Could not process the game sheet(s).')
 
         self._sort_key_values()
         if not self._sorted_key_values:
@@ -468,6 +493,79 @@ class OMR():
         """
         for key in self._bubble_location:
             self._bubble_location[key][0] = self._scanned_keys_average[key]
+#-----------------------------------------------------------------------------------------------------------------------
+    def _process_images(self, image_directory: int, image_names: list[str], data: str, color: str) -> None:
+        """_summary_
+        Args:
+            image_directory (int): Index for the list of folder names.
+            image_names (list[str]): Names of the files to be read in and marked locations saved. 
+            data (str): Where the image is a key or game sheet.
+            color (str): The color range that the opencv tries to match.
+        """
+        for i in range(len(image_names)):
+            try:
+                marks = []
+                img = cv2.imread(self.directories[image_directory] + image_names[i])
+                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+                # Threshold for blue.
+                if color == 'blue':
+                    lower_range = np.array([110,50,50])
+                    upper_range = np.array([130,255,255])
+                else:
+                    lower_range = np.array([110,50,50])
+                    upper_range = np.array([130,255,255])
+
+                thresh = cv2.inRange(hsv, lower_range, upper_range)
+
+                # Apply erosion.
+                kernel = np.ones(shape = (5,5),
+                                    dtype = np.uint8)
+                erode = cv2.erode(src = thresh,
+                                    kernel = kernel,
+                                    iterations = 1)
+
+                # Apply morphology open.
+                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE, 
+                                                   ksize = (25,25))
+                first_morph = cv2.morphologyEx(src = erode, 
+                                               kernel = kernel, 
+                                               op = cv2.MORPH_OPEN)
+
+                # Apply morphology close.
+                kernel = cv2.getStructuringElement(shape = cv2.MORPH_ELLIPSE,
+                                                   ksize = (7,7))
+                second_morph = cv2.morphologyEx(src = first_morph,
+                                                kernel = kernel, 
+                                                op = cv2.MORPH_CLOSE)
+
+                # Get contours
+                contours = cv2.findContours(image = second_morph,
+                                            mode = cv2.RETR_EXTERNAL,
+                                            method= cv2.CHAIN_APPROX_NONE)
+                contours = contours[0] if len(contours) == 2 else contours[1]
+                if self.save_image_overlay:
+                    result = img.copy() 
+                for contour in contours:
+                    M = cv2.moments(contour)
+                    cx = int(M["m10"] / M["m00"])
+                    cy = int(M["m01"] / M["m00"])
+                    pt = (cx,cy)
+                    marks.append(pt)
+                    if self.save_image_overlay:
+                        cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
+                if data == 'key' and self.save_image_overlay:
+                    self._scanned_keys.append(tuple(sorted(marks)))
+                    cv2.imwrite(('results/' + 'key_overlay_' + str(i) + '.jpeg'), result)
+                elif data == 'key':
+                    self._scanned_keys.append(tuple(sorted(marks)))
+                elif data == 'scantron' and self.save_image_overlay:
+                    self._scanned_values.append(tuple(sorted(marks)))
+                    cv2.imwrite(('results/' + 'scantron_overlay_' + str(i) + '.jpeg'), result)
+                elif data == 'scantron':
+                    self._scanned_values.append(tuple(sorted(marks)))
+            except Exception as ex:
+                print(ex)
 
 #-----------------------------------------------------------------------------------------------------------------------
     def _process_images_executor(self,
@@ -498,18 +596,6 @@ class OMR():
             if color == 'blue':
                 lower_range = np.array([110,50,50])
                 upper_range = np.array([130,255,255])
-            # Threshold for green.
-            # elif color == 'green':
-            #     lower_range = np.array([36, 25, 25])
-            #     upper_range = np.array([70, 255,255])
-            # # Threshold for red.
-            # elif color == 'red':
-            #     lower_range = np.array([155,25,0])
-            #     upper_range = np.array([179,255,255])
-            # # Threshold for yellow.
-            # elif color == 'yellow':
-            #     lower_range = np.array([20,100,100])
-            #     upper_range = np.array([30,255,255])
             else:
                 lower_range = np.array([110,50,50])
                 upper_range = np.array([130,255,255])
