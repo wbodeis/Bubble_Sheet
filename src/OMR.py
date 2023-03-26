@@ -548,8 +548,11 @@ class OMR():
                     result = img.copy() 
                 for contour in contours:
                     M = cv2.moments(contour)
-                    cx = int(M["m10"] / M["m00"])
-                    cy = int(M["m01"] / M["m00"])
+                    if M["m00"] != 0:  # For divide by zero erros the popped up a few times. 
+                        cx = int(M["m10"] / M["m00"])
+                        cy = int(M["m01"] / M["m00"])
+                    else:
+                        continue
                     pt = (cx,cy)
                     marks.append(pt)
                     if self.save_image_overlay:
