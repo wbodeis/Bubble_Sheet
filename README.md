@@ -78,14 +78,19 @@ A shortcut is to begin typing its name, like bubb, then hit tab and it will auto
 
 key/
 - Save the pdf key files here  
+
 key_images/
 - Save the image key files here  
+
 scantron/
 - Save the pdf game sheet files here  
+
 scantron_images/
 - Save the image game sheet files here  
+
 results/
 - .csv after gathering the data is saved here  
+
 poppler/
 - Now incorporated with the executable from pyinstaller so the folder no longer needs to be included.
 - Required for converting pdf files into .jpg or whatever your chosen image format may be.
@@ -114,6 +119,7 @@ This is why it is recommended to have 3+ keys created and used for comparing the
 
 ### Popple Path
 Not an issue that has cropped up yet, but wanted to put it here just in case something does happen. The poppler folder is apart of the exe and should not be an issue if you are processing pdf files. If there is an issue like the one below:  
-> 'Unable to get page count. Is poppler installed and in PATH?'
+> 'Unable to get page count. Is poppler installed and in PATH?'  
+
 Download the most current version of poppler and save it to the root folder.  
 > [GitHub Page](https://github.com/oschwartz10612/poppler-windows).  
