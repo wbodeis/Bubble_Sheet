@@ -3,16 +3,16 @@ Project: OMR Scantron for FRC Team 5712
 Author: William Bodeis <wdbodeis@gmail.com>  
 
 This is to be used with the pdf included in this project (Game_Sheet_Ver_XXX.pdf) specific to the FIRST 2023 season "Charged Up."  
-The folders are needed and the program will first check for those. If they are not there, it will create them before exiting to be sure all the files are in the correct folders.  
+The folders are needed, and the program will first check for those. If they are not there, it will create them before exiting to be sure all the files are in the correct folders.  
 It will also close if there aren't any keys or game sheets to be read in and used, since there is no point in running the program without either available.  
-Pyinstaller is apart of the dependencies to create the standalone executable so more people are able to run it. The .spec sheet is also included for creating the .exe.
+Pyinstaller is a part of the dependencies to create the standalone executable, so more people are able to run it. The .spec sheet is also included for creating the .exe.
 The only thing missing is poppler, which is talked about more below and how to download the folder you need.  
 
 ## Environment
 Poetry was used for creating and running the environment for this project.  
 > [Poetry Homepage](https://python-poetry.org/)  
 
-The pyproject.toml was also included to be used or the dependencies are listed below to use with whatever your preferred program to create virutal environments.  
+The pyproject.toml was also included to be used or the dependencies are listed below to use with whatever your preferred program to create virtual environments.  
 
 ### Dependencies
 python = ">=3.10,<3.12"  
@@ -33,7 +33,7 @@ You need the following folders:
 
 These will be created if they don't already exist when the program runs, causing FileNotFoundError because it is assumed the files are not in the correct locations.  
 Once the folders are created and contain the necessary files, it will run all the way through.  
-keys/ and scantron/ are for .pdf files if that was how they were scanned in. The program will convert them to the specified image format. While it defaults to jpeg, which was done mostly as a way to save storage space depending on how many pages were getting converted.  
+keys/ and scantron/ are for .pdf files if that was how they were scanned in. The program will convert them to the specified image format. While it defaults to jpeg, which was done mostly to save storage space depending on how many pages were getting converted.  
 **See the note below pertaining to processing the pdf files.** 
 
 keys_images/ and scantron_images/ are where the image files should be saved if those are being used instead of pdfs.  
@@ -48,7 +48,7 @@ Highest level class for running and acquiring the game data.
 Optical Mark Recognition (OMR)  
 The class is used in doing the heavy lifting for manipulating and collating the data.  
 It will convert pdf files to whatever file format you send, while defaulting to jpeg.  
-It makes seperate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
+It makes separate lists of keys and game sheets so they can be compared to one another to get the marked bubbles.  
 It is setup to be used with blue ballpoint pens, but pencils may work. I haven't tested them to say for certain that they will.  
 It uses the HSV for determining the color spectrum to test against and the snippet is what was used for 'blue.'  
 ```
@@ -64,8 +64,8 @@ Everything is stored in the object and returned using _get_raw_data().
 
 
 ## Running the executable. 
-It is recommended to use powershell to run the script so you can see the readout if there are any errors that occur.
-You can run it by clicking it as you norammlly would, but the console closes as soon as it gets done running.
+It is recommended to use PowerShell to run the script so you can see the readout if there are any errors that occur.
+You can run it by clicking it as you normally would, but the console closes as soon as it gets done running.
 
 Change the directory to where you have this folder located. The example below is for testing it on my own computer.
 
@@ -97,13 +97,13 @@ poppler/
 - Version 23.01.0 currently being used with the executable.  
 
 ## Known Issues  
-### Memmory Error
+### Memory Error
 A computer running the program with an insufficient amount of ram will throw an error while trying to process the images. Some searching also seems to indicate that a lack of storage space may also lead to the issue when it tries to allocate the ROM due to the lack of ram. The example below, most of the ram was being used and there was only ~700mb of space left on the drive.  
 The laptop had an AMD Ryzen 5 3550H, 8gb of ram, 256gb ssd, and running windows 11.  
-An example that occured while attempting to run:  
+An example that occurred while attempting to run:  
 > OpenCV(4.7.0) D:\a\opencv-python\opencv-python\opencv\modules\core\src\alloc.cpp:73: error: (-4:Insufficient memory) Failed to allocate 33500544 bytes in function 'cv::OutOfMemoryError'  
 
-### Divide by Zerro
+### Divide by Zero
 A random error would occur with 'ZeroDivisionError' while finding the contours of an image. The best advice found was to put an if-else to help catch the error and not break the program. That specific point will be skipped while trying to ensure all the other points are kept.  
 The code snippet for this:  
 ```
