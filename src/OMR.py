@@ -242,7 +242,7 @@ class OMR():
 
         # Initializing functions.
         # Checking for and converting pdf files if those are used instead of pictures.
-        # First the keys. 
+        # Converting key pdfs. 
         if not os.listdir(self.directories[0]):
             print('No keys were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
@@ -255,7 +255,7 @@ class OMR():
                                        data = 'Key',
                                        pdf_names = self._keys_pdf_names)
         
-        # Now the game sheets.
+        # Converting game sheet pdfs.
         if not os.listdir(self.directories[2]):
             print('No game sheets were found to convert from a pdf. Looking for {} image format.'.format(self.image_format))
         else:
@@ -277,11 +277,11 @@ class OMR():
         self._change_names(directory = self.directories[3],
                            data = 'Scantron',
                            file_type = '.' + self.image_format)
+        
         # Getting the names of the images to run the data. 
         self._get_key_image_names()
         self._get_scantron_image_names()
         if not self._key_names:
-            # TODO Ask if the Constants._bubble_location should be used if none were found? 
             del self
             raise FileNotFoundError('No image(s) for key(s) to process were found.')
         if not self._scantron_names:
@@ -301,6 +301,10 @@ class OMR():
             self._scanned_keys = tuple(executor_keys)
         # Catching if the computer doesn't have enough ram to allocate the multithreading. 
         except:
+            try: # Clear up the memory allocated for the processpool 
+                del executor_keys
+            except:
+                pass
             print('An error occured trying to multithread the key processing. Attempting to run them one at a time.')
             try:
                 self._process_images(image_directory = 1, 
@@ -325,6 +329,10 @@ class OMR():
             self._scanned_values = tuple(executor_scantron)
         # Catching if the computer doesn't have enough ram to allocate the multithreading. 
         except:
+            try: # Clear up the memory allocated for the processpool 
+                del executor_scantron
+            except:
+                pass
             print('An error occured trying to multithread the game sheet processing. Attempting to run them one at a time.')
             try:
                 self._process_images(image_directory = 3,
@@ -427,9 +435,7 @@ class OMR():
             pdf_names (list[str]): Names of the files to be converted from pdf. 
         """
         for i in range(len(pdf_names)):  # Each pdf
-        # for file in os.scandir(self.directories[pdf_directory]):
                 images = convert_from_path(pdf_path = self.directories[pdf_directory] + pdf_names[i],
-                # images = convert_from_path(pdf_path = self.directories[pdf_directory] + file.name,
                                            poppler_path = 'poppler/Library/bin',
                                            dpi = 700,
                                            thread_count = self.cpu_threads)
@@ -494,7 +500,11 @@ class OMR():
         for key in self._bubble_location:
             self._bubble_location[key][0] = self._scanned_keys_average[key]
 #-----------------------------------------------------------------------------------------------------------------------
-    def _process_images(self, image_directory: int, image_names: list[str], data: str, color: str) -> None:
+    def _process_images(self,
+                        image_directory: int,
+                        image_names: list[str],
+                        data: str,
+                        color: str) -> None:
         """_summary_
         Args:
             image_directory (int): Index for the list of folder names.
@@ -544,8 +554,12 @@ class OMR():
                                             mode = cv2.RETR_EXTERNAL,
                                             method= cv2.CHAIN_APPROX_NONE)
                 contours = contours[0] if len(contours) == 2 else contours[1]
+
+                # If the image overlay needs to be saved. 
                 if self.save_image_overlay:
                     result = img.copy() 
+                
+                # Gathering the points that were detected in the image. 
                 for contour in contours:
                     M = cv2.moments(contour)
                     if M["m00"] != 0:  # For divide by zero erros the popped up a few times. 
@@ -557,6 +571,8 @@ class OMR():
                     marks.append(pt)
                     if self.save_image_overlay:
                         cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
+                
+                # Saving the data according to if it was a key or game sheet. 
                 if data == 'key' and self.save_image_overlay:
                     self._scanned_keys.append(tuple(sorted(marks)))
                     cv2.imwrite(('results/' + 'key_overlay_' + str(i) + '.jpeg'), result)
@@ -568,6 +584,7 @@ class OMR():
                 elif data == 'scantron':
                     self._scanned_values.append(tuple(sorted(marks)))
             except Exception as ex:
+                print('Error with {}. Continuing with the other files.'.format(image_names[i]))
                 print(ex)
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -631,8 +648,12 @@ class OMR():
                                         mode = cv2.RETR_EXTERNAL,
                                         method= cv2.CHAIN_APPROX_NONE)
             contours = contours[0] if len(contours) == 2 else contours[1]
+
+            # If the image overlay needs to be saved. 
             if save_image_overlay:
                 result = img.copy() 
+
+            # Gathering the points that were detected in the image. 
             for contour in contours:
                 M = cv2.moments(contour)
                 if M["m00"] != 0:  # For divide by zero erros the popped up a few times. 
@@ -644,6 +665,8 @@ class OMR():
                 omr_marks.append(pt)
                 if self.save_image_overlay:
                     cv2.circle(result, (cx, cy), 25, (0, 255, 0), -1)
+
+            # Saving the data according to if it was a key or game sheet. 
             if data == 'key' and save_image_overlay:
                 omr_marks = tuple(sorted(omr_marks))
                 cv2.imwrite(('results/' + 'key_overlay_' + image_name), result)
