@@ -117,9 +117,11 @@ for contour in contours:
 ```
 This is why it is recommended to have 3+ keys created and used for comparing the game sheets against. Later in the program, if a key file doesn't have the exact number of required marks, it will NOT be used in getting the average mark location. Potentially not having any available to check against and causing the program to exit without doing any of the work. 
 
-### Popple Path
+### Poppler Path
 Not an issue that has cropped up yet, but wanted to put it here just in case something does happen. The poppler folder is apart of the exe and should not be an issue if you are processing pdf files. If there is an issue like the one below:  
 > 'Unable to get page count. Is poppler installed and in PATH?'  
-
-Download the most current version of poppler and save it to the root folder.  
-> [GitHub Page](https://github.com/oschwartz10612/poppler-windows).  
+- Download the most current version of poppler. 
+- Extract the zipped folder to the root (same) folder as the exe. 
+- Change the name from 'poppler-23.0.1.0' (or whatever the current vesrion is on) to only 'poppler'.  
+> [GitHub Page](https://github.com/oschwartz10612/poppler-windows)  
+> [Download Page](https://github.com/oschwartz10612/poppler-windows/releases/latest)  
