@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bubble-sheet"
-version = "0.5.3"
+version = "0.5.4"
 description = ""
 authors = ["William Bodeis <wdbodeis@gmail.com>"]
 readme = "README.md"
